@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { accrueInterest, loanBalanceAt } from '@/lib/calc/loans'
+import { accrueInterest, loanBalanceAt, loansWithBalance } from '@/lib/calc/loans'
 import type { Loan, Repayment } from '@/lib/types'
 
 function loan(overrides: Partial<Loan> = {}): Loan {
@@ -129,5 +129,32 @@ describe('loanBalanceAt', () => {
   it('does not accrue before the start date', () => {
     const balance = loanBalanceAt(loan(), [], '2025-12-01')
     expect(balance.totalOutstanding).toBe(1000)
+  })
+})
+
+describe('loansWithBalance', () => {
+  const settled = loan({ id: 'L2', dueDate: '2026-06-30', principal: 100, annualRatePct: 0 })
+  const late = loan({ id: 'L3', dueDate: '2026-12-31' })
+  const early = loan({ id: 'L4', dueDate: '2026-03-31' })
+  const settleAll = repayment('2026-01-31', 100, 'L2')
+
+  it('lists unsettled loans first, then by due date', () => {
+    const result = loansWithBalance([settled, late, early], [settleAll], '2026-02-01')
+    expect(result.map((entry) => entry.loan.id)).toEqual(['L4', 'L3', 'L2'])
+    expect(result[2].balance.isPaid).toBe(true)
+  })
+
+  it('attaches each loan its own balance', () => {
+    const result = loansWithBalance([settled, early], [], '2026-01-31')
+    expect(result[0].loan.id).toBe('L4')
+    expect(result[0].balance.principalOutstanding).toBe(1000)
+    expect(result[1].loan.id).toBe('L2')
+    expect(result[1].balance.totalOutstanding).toBe(100)
+  })
+
+  it('does not mutate the input array', () => {
+    const input = [late, early]
+    loansWithBalance(input, [], '2026-01-31')
+    expect(input.map((entry) => entry.id)).toEqual(['L3', 'L4'])
   })
 })

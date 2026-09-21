@@ -89,3 +89,11 @@ export async function addRepayment(input: RepaymentInput): Promise<string> {
 export async function deleteRepayment(id: string): Promise<void> {
   await deleteDoc(doc(db, 'repayments', id))
 }
+
+/**
+ * Keeps the stored `status` in step with the engine. Display always derives the
+ * status from `loanBalanceAt`, so a failed write here never misleads the UI.
+ */
+export async function updateLoanStatus(id: string, status: LoanStatus): Promise<void> {
+  await updateDoc(doc(db, 'loans', id), { status })
+}

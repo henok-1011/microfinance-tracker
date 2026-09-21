@@ -1,5 +1,6 @@
 import type { Contribution, Target } from '@/lib/types'
 
+import { compareIso } from './date'
 import { round2, sum } from './money'
 
 export interface UserContributionSummary {
@@ -53,4 +54,37 @@ export function totalContributed(contributions: Contribution[], year?: number): 
       (c) => c.amount,
     ),
   )
+}
+
+/** Whole percent complete; exceeds 100 when a user over-contributes. */
+export function progressPercent(progress: number): number {
+  return Math.round(progress * 100)
+}
+
+export type ContributionSort = 'newest' | 'oldest' | 'largest'
+
+/**
+ * Year-scoped contributions ordered for display. Always returns a new array so
+ * callers can sort Firestore-backed state without mutating it.
+ */
+export function contributionsForYear(
+  contributions: Contribution[],
+  year?: number,
+  sort: ContributionSort = 'newest',
+): Contribution[] {
+  const scoped =
+    year === undefined ? contributions.slice() : contributions.filter((c) => c.year === year)
+
+  switch (sort) {
+    case 'oldest':
+      return scoped.sort(
+        (a, b) => compareIso(a.date, b.date) || compareIso(a.createdAt, b.createdAt),
+      )
+    case 'largest':
+      return scoped.sort((a, b) => b.amount - a.amount || compareIso(b.date, a.date))
+    default:
+      return scoped.sort(
+        (a, b) => compareIso(b.date, a.date) || compareIso(b.createdAt, a.createdAt),
+      )
+  }
 }

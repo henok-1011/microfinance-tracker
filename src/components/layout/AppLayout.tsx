@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 
 import { LanguageToggle } from '@/components/LanguageToggle'
 import { useAuth } from '@/features/auth/useAuth'
@@ -7,7 +7,9 @@ import { useAuth } from '@/features/auth/useAuth'
 export function AppLayout() {
   const { t } = useTranslation()
   const { profile, user, signOut } = useAuth()
+  const { pathname } = useLocation()
   const displayName = profile?.name ?? user?.email ?? ''
+  const isDashboard = pathname === '/'
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-screen-sm flex-col">
@@ -28,6 +30,15 @@ export function AppLayout() {
         </div>
       </header>
       <main className="flex-1 px-4 py-4">
+        {isDashboard ? null : (
+          <Link
+            to="/"
+            className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors hover:text-slate-900"
+          >
+            <span aria-hidden="true">←</span>
+            {t('reports.dashboard')}
+          </Link>
+        )}
         <Outlet />
       </main>
     </div>

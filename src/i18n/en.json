@@ -9,6 +9,8 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
+    "hide": "Hide",
+    "year": "Year",
     "error": "Could not load data. Please try again."
   },
   "auth": {
@@ -29,7 +31,46 @@
   },
   "reports": {
     "dashboard": "Dashboard",
-    "placeholder": "Reports will be implemented in Phase 6."
+    "title": "Reports",
+    "summary": "Read-only summaries of the shared pool.",
+    "linkSummary": "Contributions by member with yearly totals.",
+    "contributionsTitle": "Contributions report {{year}}",
+    "loanTitle": "Loan report",
+    "loanTotals": "All loans",
+    "loanTableEmpty": "No loans recorded yet.",
+    "loanTotalsNote": "Interest earned to date: {{interest}}.",
+    "amountsInEtb": "Amounts in ETB",
+    "tableEmpty": "No yearly targets set for {{year}}.",
+    "columns": {
+      "member": "Member",
+      "target": "Target",
+      "contributed": "Paid",
+      "remaining": "Left",
+      "percent": "%",
+      "borrower": "Borrower",
+      "principal": "Principal",
+      "rate": "Rate",
+      "start": "Start",
+      "due": "Due",
+      "paid": "Paid",
+      "interest": "Interest",
+      "outstanding": "Outstanding",
+      "status": "Status"
+    },
+    "progressTitle": "Contribution progress {{year}}",
+    "progressEmpty": "No yearly targets set for {{year}}.",
+    "progressTotals": "All members",
+    "percent": "{{percent}}%",
+    "remaining": "Remaining",
+    "fullyPaid": "Fully paid",
+    "pool": {
+      "title": "Shared pool",
+      "cashOnHand": "Cash on hand",
+      "outstandingContributions": "Outstanding contributions",
+      "loanBookOutstanding": "Loan book outstanding",
+      "interestEarned": "Interest earned",
+      "projectedPool": "Projected pool"
+    }
   },
   "admin": {
     "users": {
@@ -45,7 +86,6 @@
       "phone": "Phone",
       "active": "Active",
       "inactive": "Inactive",
-      "year": "Year",
       "targetForYear": "Target for {{year}} (ETB)",
       "confirmDelete": "Delete this user?",
       "roles": {
@@ -58,6 +98,105 @@
         "invalidTarget": "Enter a target of 0 or more.",
         "network": "Could not reach the server. Run user management with `vercel dev` so /api is available.",
         "generic": "Something went wrong. Please try again."
+      }
+    },
+    "contributions": {
+      "title": "Contributions",
+      "summary": "Record member payments into the shared pool.",
+      "add": "Record contribution",
+      "user": "Member",
+      "selectUser": "Select a member",
+      "amount": "Amount (ETB)",
+      "date": "Date",
+      "note": "Note",
+      "notePlaceholder": "Optional",
+      "save": "Record contribution",
+      "listTitle": "Recorded contributions",
+      "count": "{{count}} entries",
+      "sortLabel": "Sort",
+      "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first",
+        "largest": "Largest first"
+      },
+      "empty": "No contributions recorded for {{year}}.",
+      "edit": "Edit contribution",
+      "confirmDelete": "Delete this contribution?",
+      "preview": {
+        "target": "Yearly target",
+        "paid": "Paid so far",
+        "remaining": "Remaining",
+        "afterPayment": "Remaining after this payment",
+        "overpaid": "Fully paid",
+        "noTarget": "No target set for this member in {{year}}."
+      },
+      "errors": {
+        "userRequired": "Select a member.",
+        "amountRequired": "Enter an amount greater than 0.",
+        "dateRequired": "Enter the date as yyyy-mm-dd."
+      }
+    },
+    "loans": {
+      "title": "Loans",
+      "summary": "Disburse loans from the shared pool and record repayments.",
+      "add": "Add loan",
+      "borrower": "Borrower",
+      "phone": "Phone",
+      "principal": "Principal (ETB)",
+      "rate": "Annual rate %",
+      "startDate": "Start date",
+      "dueDate": "Due date",
+      "save": "Add loan",
+      "preview": {
+        "interest": "Interest to the due date",
+        "totalDue": "Total due at the due date"
+      },
+      "listTitle": "Loan book",
+      "empty": "No loans recorded yet.",
+      "status": {
+        "active": "Active",
+        "paid": "Repaid"
+      },
+      "outstanding": "Outstanding now",
+      "breakdown": "Principal + interest",
+      "details": "Repayment history",
+      "repayments": "Repayments",
+      "noRepayments": "No repayments recorded yet.",
+      "principalOutstanding": "Principal outstanding",
+      "interestAccrued": "Interest accrued",
+      "interestPaid": "Interest paid",
+      "totalPaid": "Total paid",
+      "allocation": {
+        "interest": "Interest",
+        "principal": "Principal",
+        "balance": "Balance after"
+      },
+      "repay": {
+        "title": "Record repayment",
+        "search": "Find a loan",
+        "searchPlaceholder": "Borrower name",
+        "loan": "Loan",
+        "selectLoan": "Select a loan",
+        "amount": "Amount (ETB)",
+        "date": "Date",
+        "save": "Record repayment",
+        "empty": "No active loans to repay.",
+        "before": "Outstanding before",
+        "after": "Outstanding after",
+        "interestPortion": "Applied to interest",
+        "principalPortion": "Applied to principal",
+        "settled": "This payment settles the loan."
+      },
+      "errors": {
+        "borrowerRequired": "Enter the borrower's name.",
+        "principalRequired": "Enter a principal greater than 0.",
+        "rateInvalid": "Enter an annual rate of 0 or more.",
+        "startRequired": "Enter a valid start date.",
+        "dueRequired": "Enter a valid due date.",
+        "dueBeforeStart": "The due date cannot be before the start date.",
+        "loanRequired": "Select a loan.",
+        "amountRequired": "Enter an amount greater than 0.",
+        "dateRequired": "Enter the date as yyyy-mm-dd."
       }
     }
   },

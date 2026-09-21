@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  contributionsForYear,
+  progressPercent,
   summarizeContributions,
   summarizeUser,
   totalContributed,
@@ -106,5 +108,74 @@ describe('totals', () => {
     expect(totalExpected(targets)).toBe(28000)
     expect(totalContributed(contributions, 2026)).toBe(13000)
     expect(totalContributed(contributions)).toBe(23000)
+  })
+})
+
+describe('progressPercent', () => {
+  it('rounds to a whole percent', () => {
+    expect(progressPercent(0.756)).toBe(76)
+    expect(progressPercent(1)).toBe(100)
+    expect(progressPercent(0)).toBe(0)
+  })
+
+  it('reports over-contribution above 100', () => {
+    expect(progressPercent(1.5)).toBe(150)
+  })
+})
+
+describe('contributionsForYear', () => {
+  function dated(id: string, date: string, amount: number, createdAt: string): Contribution {
+    return {
+      id,
+      userId: 'u1',
+      year: Number(date.slice(0, 4)),
+      amount,
+      date,
+      note: '',
+      recordedBy: 'admin',
+      createdAt,
+    }
+  }
+
+  const entries = [
+    dated('c1', '2026-03-01', 100, '2026-03-01T10:00:00.000Z'),
+    dated('c2', '2026-01-01', 50, '2026-01-01T10:00:00.000Z'),
+    dated('c3', '2026-02-01', 500, '2026-02-01T10:00:00.000Z'),
+    dated('c4', '2025-12-01', 700, '2025-12-01T10:00:00.000Z'),
+  ]
+
+  it('defaults to newest first and scopes to the year', () => {
+    expect(contributionsForYear(entries, 2026).map((entry) => entry.id)).toEqual(['c1', 'c3', 'c2'])
+  })
+
+  it('sorts oldest first', () => {
+    expect(contributionsForYear(entries, 2026, 'oldest').map((entry) => entry.id)).toEqual([
+      'c2',
+      'c3',
+      'c1',
+    ])
+  })
+
+  it('sorts by amount descending', () => {
+    expect(contributionsForYear(entries, 2026, 'largest').map((entry) => entry.id)).toEqual([
+      'c3',
+      'c1',
+      'c2',
+    ])
+  })
+
+  it('breaks date ties with createdAt', () => {
+    const sameDay = [
+      dated('early', '2026-05-01', 10, '2026-05-01T08:00:00.000Z'),
+      dated('late', '2026-05-01', 10, '2026-05-01T20:00:00.000Z'),
+    ]
+    expect(contributionsForYear(sameDay, 2026).map((entry) => entry.id)).toEqual(['late', 'early'])
+  })
+
+  it('returns every year when no year is given, without mutating the input', () => {
+    const input = [...entries]
+    const result = contributionsForYear(input, undefined, 'oldest')
+    expect(result).toHaveLength(4)
+    expect(input.map((entry) => entry.id)).toEqual(['c1', 'c2', 'c3', 'c4'])
   })
 })

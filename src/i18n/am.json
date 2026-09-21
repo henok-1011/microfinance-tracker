@@ -9,6 +9,8 @@
     "cancel": "ተው",
     "edit": "አስተካክል",
     "delete": "ሰርዝ",
+    "hide": "ደብቅ",
+    "year": "ዓመት",
     "error": "ውሂብ ማምጣት አልተቻለም። እንደገና ይሞክሩ።"
   },
   "auth": {
@@ -29,7 +31,46 @@
   },
   "reports": {
     "dashboard": "ዳሽቦርድ",
-    "placeholder": "ሪፖርቶች በደረጃ 6 ይተገበራሉ።"
+    "title": "ሪፖርቶች",
+    "summary": "የጋራ ገንዘቡ በንባብ ብቻ የሚታይ ማጠቃለያ።",
+    "linkSummary": "የአባላት መዋጮ ከዓመታዊ ድምር ጋር።",
+    "contributionsTitle": "የመዋጮ ሪፖርት {{year}}",
+    "loanTitle": "የብድር ሪፖርት",
+    "loanTotals": "ሁሉም ብድሮች",
+    "loanTableEmpty": "እስካሁን ብድር አልተመዘገበም።",
+    "loanTotalsNote": "እስካሁን የተገኘ ወለድ፡ {{interest}}።",
+    "amountsInEtb": "መጠኖች በብር",
+    "tableEmpty": "ለ{{year}} የዓመት ግብ አልተቀመጠም።",
+    "columns": {
+      "member": "አባል",
+      "target": "ግብ",
+      "contributed": "የተከፈለ",
+      "remaining": "ቀሪ",
+      "percent": "%",
+      "borrower": "ተበዳሪ",
+      "principal": "ዋና",
+      "rate": "ተመን",
+      "start": "መጀመሪያ",
+      "due": "መክፈያ",
+      "paid": "የተከፈለ",
+      "interest": "ወለድ",
+      "outstanding": "ቀሪ",
+      "status": "ሁኔታ"
+    },
+    "progressTitle": "የመዋጮ ሂደት {{year}}",
+    "progressEmpty": "ለ{{year}} የዓመት ግብ አልተቀመጠም።",
+    "progressTotals": "ሁሉም አባላት",
+    "percent": "{{percent}}%",
+    "remaining": "ቀሪ",
+    "fullyPaid": "ሙሉ በሙሉ ተከፍሏል",
+    "pool": {
+      "title": "የጋራ ገንዘብ",
+      "cashOnHand": "በእጅ ያለ ገንዘብ",
+      "outstandingContributions": "ያልተከፈለ መዋጮ",
+      "loanBookOutstanding": "በብድር ያለ ገንዘብ",
+      "interestEarned": "የተገኘ ወለድ",
+      "projectedPool": "የሚጠበቅ ገንዘብ"
+    }
   },
   "admin": {
     "users": {
@@ -45,7 +86,6 @@
       "phone": "ስልክ",
       "active": "ንቁ",
       "inactive": "የተሰናከለ",
-      "year": "ዓመት",
       "targetForYear": "የ{{year}} ግብ (ብር)",
       "confirmDelete": "ይህ ተጠቃሚ ይሰረዝ?",
       "roles": {
@@ -58,6 +98,105 @@
         "invalidTarget": "0 ወይም ከዚያ በላይ የሆነ ግብ ያስገቡ።",
         "network": "አገልጋዩ አልተገኘም። የተጠቃሚ አስተዳደር እንዲሰራ በ`vercel dev` ያሂዱ።",
         "generic": "ስህተት ተፈጥሯል። እንደገና ይሞክሩ።"
+      }
+    },
+    "contributions": {
+      "title": "መዋጮዎች",
+      "summary": "ወደ የጋራ ገንዘብ የተከፈሉ ገንዘቦችን ይመዝግቡ።",
+      "add": "መዋጮ መዝግብ",
+      "user": "አባል",
+      "selectUser": "አባል ይምረጡ",
+      "amount": "መጠን (ብር)",
+      "date": "ቀን",
+      "note": "ማስታወሻ",
+      "notePlaceholder": "አማራጭ",
+      "save": "መዋጮ መዝግብ",
+      "listTitle": "የተመዘገቡ መዋጮዎች",
+      "count": "{{count}} መዝገቦች",
+      "sortLabel": "ደርድር",
+      "sort": {
+        "newest": "አዲስ በመጀመሪያ",
+        "oldest": "አሮጌ በመጀመሪያ",
+        "largest": "ትልቁ በመጀመሪያ"
+      },
+      "empty": "ለ{{year}} የተመዘገበ መዋጮ የለም።",
+      "edit": "መዋጮ አስተካክል",
+      "confirmDelete": "ይህ መዋጮ ይሰረዝ?",
+      "preview": {
+        "target": "የዓመት ግብ",
+        "paid": "የተከፈለ",
+        "remaining": "ቀሪ",
+        "afterPayment": "ከዚህ ክፍያ በኋላ ቀሪ",
+        "overpaid": "ሙሉ በሙሉ ተከፍሏል",
+        "noTarget": "ለዚህ አባል በ{{year}} ግብ አልተቀመጠም።"
+      },
+      "errors": {
+        "userRequired": "አባል ይምረጡ።",
+        "amountRequired": "ከ0 በላይ የሆነ መጠን ያስገቡ።",
+        "dateRequired": "ቀኑን እንደ yyyy-mm-dd ያስገቡ።"
+      }
+    },
+    "loans": {
+      "title": "ብድሮች",
+      "summary": "ከጋራ ገንዘብ ብድር ይስጡ እና ክፍያዎችን ይመዝግቡ።",
+      "add": "ብድር ጨምር",
+      "borrower": "ተበዳሪ",
+      "phone": "ስልክ",
+      "principal": "ዋና ገንዘብ (ብር)",
+      "rate": "ዓመታዊ ተመን %",
+      "startDate": "የመጀመሪያ ቀን",
+      "dueDate": "የመክፈያ ቀን",
+      "save": "ብድር ጨምር",
+      "preview": {
+        "interest": "እስከ መክፈያ ቀን ወለድ",
+        "totalDue": "በመክፈያ ቀን ጠቅላላ ተከፋይ"
+      },
+      "listTitle": "የብድር መዝገብ",
+      "empty": "እስካሁን ብድር አልተመዘገበም።",
+      "status": {
+        "active": "በሂደት ላይ",
+        "paid": "ተከፍሏል"
+      },
+      "outstanding": "አሁን ያለው ቀሪ",
+      "breakdown": "ዋና + ወለድ",
+      "details": "የክፍያ ታሪክ",
+      "repayments": "ክፍያዎች",
+      "noRepayments": "እስካሁን ክፍያ አልተመዘገበም።",
+      "principalOutstanding": "ቀሪ ዋና ገንዘብ",
+      "interestAccrued": "የተጠራቀመ ወለድ",
+      "interestPaid": "የተከፈለ ወለድ",
+      "totalPaid": "ጠቅላላ የተከፈለ",
+      "allocation": {
+        "interest": "ወለድ",
+        "principal": "ዋና",
+        "balance": "ቀሪ"
+      },
+      "repay": {
+        "title": "ክፍያ መዝግብ",
+        "search": "ብድር ፈልግ",
+        "searchPlaceholder": "የተበዳሪ ስም",
+        "loan": "ብድር",
+        "selectLoan": "ብድር ይምረጡ",
+        "amount": "መጠን (ብር)",
+        "date": "ቀን",
+        "save": "ክፍያ መዝግብ",
+        "empty": "የሚከፈል ብድር የለም።",
+        "before": "ከክፍያ በፊት ቀሪ",
+        "after": "ከክፍያ በኋላ ቀሪ",
+        "interestPortion": "ለወለድ የዋለ",
+        "principalPortion": "ለዋና ገንዘብ የዋለ",
+        "settled": "ይህ ክፍያ ብድሩን ያጠናቅቃል።"
+      },
+      "errors": {
+        "borrowerRequired": "የተበዳሪውን ስም ያስገቡ።",
+        "principalRequired": "ከ0 በላይ የሆነ ዋና ገንዘብ ያስገቡ።",
+        "rateInvalid": "0 ወይም ከዚያ በላይ ዓመታዊ ተመን ያስገቡ።",
+        "startRequired": "ትክክለኛ የመጀመሪያ ቀን ያስገቡ።",
+        "dueRequired": "ትክክለኛ የመክፈያ ቀን ያስገቡ።",
+        "dueBeforeStart": "የመክፈያ ቀን ከመጀመሪያው ቀን በፊት መሆን አይችልም።",
+        "loanRequired": "ብድር ይምረጡ።",
+        "amountRequired": "ከ0 በላይ የሆነ መጠን ያስገቡ።",
+        "dateRequired": "ቀኑን እንደ yyyy-mm-dd ያስገቡ።"
       }
     }
   },

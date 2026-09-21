@@ -1,6 +1,6 @@
 import type { Loan, Repayment } from '@/lib/types'
 
-import { daysBetween } from './date'
+import { compareIso, daysBetween } from './date'
 import { round2 } from './money'
 
 const DAYS_PER_YEAR = 365
@@ -96,4 +96,29 @@ export function loanBalanceAt(loan: Loan, repayments: Repayment[], asOf: string)
     isPaid: totalOutstanding <= PAID_EPSILON,
     allocations,
   }
+}
+
+export interface LoanWithBalance {
+  loan: Loan
+  balance: LoanBalance
+}
+
+/**
+ * Pairs each loan with its live balance, unsettled loans first, then by due
+ * date. Always returns a new array so callers can sort state safely.
+ */
+export function loansWithBalance(
+  loans: Loan[],
+  repayments: Repayment[],
+  asOf: string,
+): LoanWithBalance[] {
+  return loans
+    .map((loan) => ({ loan, balance: loanBalanceAt(loan, repayments, asOf) }))
+    .sort(
+      (a, b) =>
+        Number(a.balance.isPaid) - Number(b.balance.isPaid) ||
+        compareIso(a.loan.dueDate, b.loan.dueDate) ||
+        compareIso(a.loan.startDate, b.loan.startDate) ||
+        a.loan.id.localeCompare(b.loan.id),
+    )
 }

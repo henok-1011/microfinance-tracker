@@ -16,6 +16,21 @@ export function todayIso(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+/** True for a real `yyyy-mm-dd` calendar date, so `2026-02-30` is rejected. */
+export function isIsoDate(value: string): boolean {
+  if (!ISO_DATE_PATTERN.test(value)) return false
+  const [year, month, day] = value.split('-').map(Number)
+  if (month < 1 || month > 12 || day < 1 || day > 31) return false
+  const parsed = new Date(Date.UTC(year, month - 1, day))
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month - 1 &&
+    parsed.getUTCDate() === day
+  )
+}
+
 /** Lexicographic comparison, valid for ISO-8601 date strings. */
 export function compareIso(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0

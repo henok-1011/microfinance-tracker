@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Spinner } from '@/components/ui/Spinner'
+import { YearSelect } from '@/components/ui/YearSelect'
 import { useAuth } from '@/features/auth/useAuth'
 import { CreateUserForm } from '@/features/users/components/CreateUserForm'
 import { EditUserForm } from '@/features/users/components/EditUserForm'
@@ -9,11 +10,6 @@ import { TargetInput } from '@/features/users/components/TargetInput'
 import { describeUserError } from '@/features/users/errors'
 import { useTargets, useUsers } from '@/features/users/hooks'
 import { deleteUser } from '@/features/users/service'
-
-function recentYears(span = 2): number[] {
-  const current = new Date().getFullYear()
-  return Array.from({ length: span + 2 }, (_, index) => current + 1 - index)
-}
 
 export function UserListPage() {
   const { t } = useTranslation()
@@ -28,7 +24,6 @@ export function UserListPage() {
   const [actionError, setActionError] = useState<string | null>(null)
 
   const isAdmin = role === 'admin'
-  const years = useMemo(() => recentYears(), [])
 
   const sortedUsers = useMemo(
     () => [...users].sort((a, b) => a.name.localeCompare(b.name) || a.email.localeCompare(b.email)),
@@ -71,20 +66,9 @@ export function UserListPage() {
         ) : null}
       </div>
 
-      <label className="mt-4 flex items-center gap-2 text-xs font-medium text-slate-600">
-        {t('admin.users.year')}
-        <select
-          value={year}
-          onChange={(event) => setYear(Number(event.target.value))}
-          className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-700"
-        >
-          {years.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="mt-4">
+        <YearSelect value={year} onChange={setYear} />
+      </div>
 
       {creating ? (
         <div className="mt-4">

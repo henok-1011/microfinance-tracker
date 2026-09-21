@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { loanBalanceAt, round2 } from '@/lib/calc'
 import { summarizePool } from '@/lib/calc/pool'
 import type { Contribution, Loan, Repayment, Target } from '@/lib/types'
 
@@ -91,5 +92,24 @@ describe('summarizePool', () => {
     const pool = summarizePool([], [], [], [], '2026-01-01', 2026)
     expect(pool.cashOnHand).toBe(0)
     expect(pool.projectedPool).toBe(0)
+  })
+
+  it('keeps accruing on an overdue loan past its due date', () => {
+    // Viewed after the due date, the balance must reflect interest to today, and
+    // the projection cannot shrink below it.
+    const overdue = summarizePool([], [], [loan], [], '2027-06-30')
+    const atDue = loanBalanceAt(loan, [], loan.dueDate).totalOutstanding
+    expect(overdue.loanBookOutstanding).toBeGreaterThan(atDue)
+    expect(overdue.projectedPool).toBe(round2(overdue.cashOnHand + overdue.loanBookOutstanding))
+  })
+
+  it('projects an unsettled loan forward to its due date', () => {
+    const pool = summarizePool([], [], [loan], [], '2026-01-01')
+    // Nothing has accrued yet, so today's book is the bare principal.
+    expect(pool.loanBookOutstanding).toBe(2000)
+    expect(pool.cashOnHand).toBe(-2000)
+    expect(pool.projectedPool).toBe(
+      round2(pool.cashOnHand + loanBalanceAt(loan, [], loan.dueDate).totalOutstanding),
+    )
   })
 })
