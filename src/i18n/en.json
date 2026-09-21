@@ -11,7 +11,20 @@
     "delete": "Delete",
     "hide": "Hide",
     "year": "Year",
+    "retry": "Try again",
+    "switchLanguage": "Switch language",
     "error": "Could not load data. Please try again."
+  },
+  "roles": {
+    "admin": "Admin",
+    "user": "User"
+  },
+  "errors": {
+    "boundary": {
+      "title": "Something went wrong",
+      "message": "This screen hit an unexpected error. Reloading usually clears it.",
+      "reload": "Reload app"
+    }
   },
   "auth": {
     "signIn": "Sign in",
@@ -73,6 +86,8 @@
     }
   },
   "admin": {
+    "title": "Admin",
+    "summary": "Manage members, contributions, and the loan book.",
     "users": {
       "title": "User management",
       "summary": "Add users and set yearly targets.",
@@ -88,10 +103,6 @@
       "inactive": "Inactive",
       "targetForYear": "Target for {{year}} (ETB)",
       "confirmDelete": "Delete this user?",
-      "roles": {
-        "admin": "Admin",
-        "user": "User"
-      },
       "errors": {
         "required": "Name, email, and password are required.",
         "nameRequired": "Enter a name.",
@@ -206,8 +217,10 @@
     "goHome": "Go home"
   },
   "nav": {
+    "primary": "Main navigation",
     "home": "Home",
     "reports": "Reports",
-    "loans": "Loans"
+    "loans": "Loans",
+    "admin": "Admin"
   }
 }

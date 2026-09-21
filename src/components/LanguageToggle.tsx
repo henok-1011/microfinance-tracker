@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 export function LanguageToggle() {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const next = i18n.language === 'am' ? 'en' : 'am'
 
   function toggle() {
@@ -13,8 +13,9 @@ export function LanguageToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label="Switch language"
-      className="rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+      aria-label={t('common.switchLanguage')}
+      // Both language names are endonyms, so they stay untranslated.
+      className="min-h-11 rounded-md border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
     >
       {next === 'am' ? 'አማ' : 'EN'}
     </button>

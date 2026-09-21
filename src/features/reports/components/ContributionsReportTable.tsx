@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import {
   progressPercent,
   round2,
@@ -42,11 +43,7 @@ export function ContributionsReportTable({
   const overallPercent = progressPercent(expected > 0 ? contributed / expected : 0)
 
   if (rows.length === 0) {
-    return (
-      <p className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
-        {t('reports.tableEmpty', { year })}
-      </p>
-    )
+    return <EmptyState message={t('reports.tableEmpty', { year })} />
   }
 
   return (

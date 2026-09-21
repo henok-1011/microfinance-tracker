@@ -1,50 +1,32 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
-import { Spinner } from '@/components/ui/Spinner'
+import { ErrorState } from '@/components/ui/ErrorState'
+import { ListSkeleton } from '@/components/ui/Skeleton'
 import { YearSelect } from '@/components/ui/YearSelect'
-import { useAuth } from '@/features/auth/useAuth'
 import { UserProgressCards } from '@/features/contributions/components/UserProgressCards'
 import { useContributions } from '@/features/contributions/hooks'
 import { useLoans, useRepayments } from '@/features/loans/hooks'
 import { PoolSummaryCards } from '@/features/reports/components/PoolSummaryCards'
 import { useTargets, useUsers } from '@/features/users/hooks'
 
-const LINKS = [
-  { to: '/reports', title: 'reports.title', summary: 'reports.linkSummary', adminOnly: false },
-  {
-    to: '/admin/users',
-    title: 'admin.users.title',
-    summary: 'admin.users.summary',
-    adminOnly: true,
-  },
-  {
-    to: '/admin/contributions',
-    title: 'admin.contributions.title',
-    summary: 'admin.contributions.summary',
-    adminOnly: true,
-  },
-  {
-    to: '/admin/loans',
-    title: 'admin.loans.title',
-    summary: 'admin.loans.summary',
-    adminOnly: true,
-  },
-]
-
 export function DashboardPage() {
   const { t } = useTranslation()
-  const { role } = useAuth()
-  const { data: users, loading: usersLoading, error: usersError } = useUsers()
-  const { data: targets } = useTargets()
+  const { data: users, loading: usersLoading, error: usersError, reload: reloadUsers } = useUsers()
+  const { data: targets, reload: reloadTargets } = useTargets()
   const {
     data: contributions,
     loading: contributionsLoading,
     error: contributionsError,
+    reload: reloadContributions,
   } = useContributions()
-  const { data: loans, loading: loansLoading, error: loansError } = useLoans()
-  const { data: repayments, loading: repaymentsLoading, error: repaymentsError } = useRepayments()
+  const { data: loans, loading: loansLoading, error: loansError, reload: reloadLoans } = useLoans()
+  const {
+    data: repayments,
+    loading: repaymentsLoading,
+    error: repaymentsError,
+    reload: reloadRepayments,
+  } = useRepayments()
 
   const [year, setYear] = useState(() => new Date().getFullYear())
 
@@ -60,10 +42,24 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {loading ? <Spinner label={t('common.loading')} /> : null}
+      {loading ? (
+        <div className="mt-4">
+          <ListSkeleton />
+        </div>
+      ) : null}
 
       {!loading && error ? (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{t('common.error')}</p>
+        <div className="mt-4">
+          <ErrorState
+            onRetry={() => {
+              reloadUsers()
+              reloadTargets()
+              reloadContributions()
+              reloadLoans()
+              reloadRepayments()
+            }}
+          />
+        </div>
       ) : null}
 
       {!loading && !error ? (
@@ -85,19 +81,6 @@ export function DashboardPage() {
               contributions={contributions}
               year={year}
             />
-          </div>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {LINKS.filter((link) => !link.adminOnly || role === 'admin').map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-brand-500"
-              >
-                <p className="text-sm font-semibold text-slate-900">{t(link.title)}</p>
-                <p className="mt-1 text-xs text-slate-500">{t(link.summary)}</p>
-              </Link>
-            ))}
           </div>
         </>
       ) : null}

@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import { addRepayment, updateLoanStatus } from '@/features/loans/service'
 import { describeUserError } from '@/features/users/errors'
 import { isIsoDate, loanBalanceAt, loansWithBalance, todayIso } from '@/lib/calc'
@@ -8,7 +9,7 @@ import { formatETB } from '@/lib/format'
 import type { Loan, Repayment } from '@/lib/types'
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
+  'mt-1 min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
 const labelClass = 'block text-sm font-medium text-slate-700'
 
 const PREVIEW_ID = '__preview__'
@@ -118,9 +119,9 @@ export function RecordRepaymentForm({ loans, repayments, today }: RecordRepaymen
       <h3 className="text-sm font-semibold text-slate-900">{t('admin.loans.repay.title')}</h3>
 
       {openLoans.length === 0 ? (
-        <p className="mt-3 rounded-lg border border-dashed border-slate-300 px-3 py-4 text-center text-xs text-slate-500">
-          {t('admin.loans.repay.empty')}
-        </p>
+        <div className="mt-3">
+          <EmptyState message={t('admin.loans.repay.empty')} />
+        </div>
       ) : (
         <>
           <label className={`mt-3 ${labelClass}`}>
@@ -217,7 +218,7 @@ export function RecordRepaymentForm({ loans, repayments, today }: RecordRepaymen
           <button
             type="submit"
             disabled={submitting}
-            className="mt-4 w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+            className="mt-4 min-h-11 w-full rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
           >
             {submitting ? t('common.saving') : t('admin.loans.repay.save')}
           </button>

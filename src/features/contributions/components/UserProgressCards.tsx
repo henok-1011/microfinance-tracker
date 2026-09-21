@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import {
   progressPercent,
   summarizeContributions,
@@ -49,9 +50,9 @@ export function UserProgressCards({ users, targets, contributions, year }: UserP
       </h3>
 
       {summaries.length === 0 ? (
-        <p className="mt-3 rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
-          {t('reports.progressEmpty', { year })}
-        </p>
+        <div className="mt-3">
+          <EmptyState message={t('reports.progressEmpty', { year })} />
+        </div>
       ) : (
         <>
           <div className="mt-3 rounded-xl border border-brand-200 bg-brand-50 p-4">

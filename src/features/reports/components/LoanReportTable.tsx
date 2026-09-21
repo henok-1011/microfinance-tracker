@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import { loansWithBalance, sum } from '@/lib/calc'
 import { formatAmount, formatETB } from '@/lib/format'
 import type { Loan, Repayment } from '@/lib/types'
@@ -34,11 +35,7 @@ export function LoanReportTable({ loans, repayments, asOf }: LoanReportTableProp
   )
 
   if (entries.length === 0) {
-    return (
-      <p className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
-        {t('reports.loanTableEmpty')}
-      </p>
-    )
+    return <EmptyState message={t('reports.loanTableEmpty')} />
   }
 
   return (

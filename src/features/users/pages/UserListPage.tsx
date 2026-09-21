@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Spinner } from '@/components/ui/Spinner'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { ErrorState } from '@/components/ui/ErrorState'
+import { ListSkeleton } from '@/components/ui/Skeleton'
 import { YearSelect } from '@/components/ui/YearSelect'
 import { useAuth } from '@/features/auth/useAuth'
 import { CreateUserForm } from '@/features/users/components/CreateUserForm'
@@ -14,8 +16,8 @@ import { deleteUser } from '@/features/users/service'
 export function UserListPage() {
   const { t } = useTranslation()
   const { role, user: currentUser } = useAuth()
-  const { data: users, loading, error } = useUsers()
-  const { data: targets } = useTargets()
+  const { data: users, loading, error, reload: reloadUsers } = useUsers()
+  const { data: targets, reload: reloadTargets } = useTargets()
 
   const [year, setYear] = useState(() => new Date().getFullYear())
   const [creating, setCreating] = useState(false)
@@ -59,7 +61,7 @@ export function UserListPage() {
               setCreating(true)
               setActionError(null)
             }}
-            className="shrink-0 rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700"
+            className="min-h-11 shrink-0 rounded-lg bg-brand-600 px-3 text-xs font-semibold text-white transition-colors hover:bg-brand-700"
           >
             {t('admin.users.add')}
           </button>
@@ -87,16 +89,19 @@ export function UserListPage() {
       ) : null}
 
       <div className="mt-4 space-y-3">
-        {loading ? <Spinner label={t('common.loading')} /> : null}
+        {loading ? <ListSkeleton /> : null}
 
         {!loading && error ? (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{t('common.error')}</p>
+          <ErrorState
+            onRetry={() => {
+              reloadUsers()
+              reloadTargets()
+            }}
+          />
         ) : null}
 
         {!loading && !error && sortedUsers.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
-            {t('admin.users.empty')}
-          </p>
+          <EmptyState message={t('admin.users.empty')} />
         ) : null}
 
         {sortedUsers.map((item) => {
@@ -134,7 +139,7 @@ export function UserListPage() {
                             : 'bg-slate-100 text-slate-600'
                         }`}
                       >
-                        {t(`admin.users.roles.${item.role}`)}
+                        {t(`roles.${item.role}`)}
                       </span>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
@@ -169,14 +174,14 @@ export function UserListPage() {
                           <button
                             type="button"
                             onClick={() => void handleDelete(item.uid)}
-                            className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700"
+                            className="min-h-11 rounded-lg bg-red-600 px-3 text-xs font-semibold text-white transition-colors hover:bg-red-700"
                           >
                             {t('common.delete')}
                           </button>
                           <button
                             type="button"
                             onClick={() => setConfirmingUid(null)}
-                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                            className="min-h-11 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
                           >
                             {t('common.cancel')}
                           </button>
@@ -186,7 +191,7 @@ export function UserListPage() {
                           <button
                             type="button"
                             onClick={() => setEditingUid(item.uid)}
-                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                            className="min-h-11 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
                           >
                             {t('common.edit')}
                           </button>
@@ -197,7 +202,7 @@ export function UserListPage() {
                                 setConfirmingUid(item.uid)
                                 setActionError(null)
                               }}
-                              className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50"
+                              className="min-h-11 rounded-lg border border-red-200 px-3 text-xs font-medium text-red-700 transition-colors hover:bg-red-50"
                             >
                               {t('common.delete')}
                             </button>

@@ -5,7 +5,7 @@ import { describeUserError } from '@/features/users/errors'
 import { createUser, setYearlyTarget } from '@/features/users/service'
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
+  'mt-1 min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
 const labelClass = 'block text-sm font-medium text-slate-700'
 
 interface CreateUserFormProps {
@@ -138,14 +138,14 @@ export function CreateUserForm({ year, onCreated, onCancel }: CreateUserFormProp
         <button
           type="submit"
           disabled={submitting}
-          className="flex-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+          className="min-h-11 flex-1 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
         >
           {submitting ? t('common.saving') : t('admin.users.create')}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          className="min-h-11 rounded-lg border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
         >
           {t('common.cancel')}
         </button>

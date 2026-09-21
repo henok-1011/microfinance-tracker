@@ -76,13 +76,13 @@ export function TargetInput({
             placeholder={fallbackAmount !== undefined ? String(fallbackAmount) : '0'}
             value={value}
             onChange={(event) => setValue(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+            className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
           />
         </label>
         <button
           type="submit"
           disabled={!isDirty || saving}
-          className="shrink-0 rounded-lg border border-brand-600 px-3 py-2 text-xs font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:border-slate-200 disabled:text-slate-400"
+          className="min-h-11 shrink-0 rounded-lg border border-brand-600 px-3 text-xs font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:border-slate-200 disabled:text-slate-400"
         >
           {saving ? t('common.saving') : t('common.save')}
         </button>

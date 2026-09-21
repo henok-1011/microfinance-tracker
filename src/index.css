@@ -10,10 +10,6 @@
   --color-brand-700: #047857;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
-
 body {
   margin: 0;
   min-height: 100dvh;
@@ -22,6 +18,22 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /*
+   * One visible focus indicator for keyboard users. This sits in the base layer
+   * so utilities win where a control already draws its own (the inputs use
+   * `outline-none` plus a focus ring).
+   */
+  :where(a, button, select, input, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+  }
 }
 
 #root {

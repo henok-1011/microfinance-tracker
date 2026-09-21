@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import { YearSelect } from '@/components/ui/YearSelect'
 import { deleteContribution, updateContribution } from '@/features/contributions/service'
 import { describeUserError } from '@/features/users/errors'
@@ -9,7 +10,7 @@ import { formatETB } from '@/lib/format'
 import type { Contribution, UserProfile } from '@/lib/types'
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
+  'mt-1 min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
 const labelClass = 'block text-xs font-medium text-slate-600'
 
 const SORTS: ContributionSort[] = ['newest', 'oldest', 'largest']
@@ -112,14 +113,14 @@ function EditContributionRow({ entry, onDone, onCancel }: EditContributionRowPro
         <button
           type="submit"
           disabled={saving}
-          className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+          className="min-h-11 flex-1 rounded-lg bg-brand-600 px-3 text-xs font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
         >
           {saving ? t('common.saving') : t('common.save')}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          className="min-h-11 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
         >
           {t('common.cancel')}
         </button>
@@ -179,7 +180,7 @@ export function ContributionList({ users, contributions, year, isAdmin }: Contri
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as ContributionSort)}
-            className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-700"
+            className="min-h-11 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-700"
           >
             {SORTS.map((option) => (
               <option key={option} value={option}>
@@ -197,9 +198,9 @@ export function ContributionList({ users, contributions, year, isAdmin }: Contri
       ) : null}
 
       {rows.length === 0 ? (
-        <p className="mt-3 rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
-          {t('admin.contributions.empty', { year })}
-        </p>
+        <div className="mt-3">
+          <EmptyState message={t('admin.contributions.empty', { year })} />
+        </div>
       ) : (
         <ul className="mt-3 space-y-2">
           {rows.map((entry) => {
@@ -245,14 +246,14 @@ export function ContributionList({ users, contributions, year, isAdmin }: Contri
                         <button
                           type="button"
                           onClick={() => void handleDelete(entry.id)}
-                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700"
+                          className="min-h-11 rounded-lg bg-red-600 px-3 text-xs font-semibold text-white transition-colors hover:bg-red-700"
                         >
                           {t('common.delete')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setConfirmingId(null)}
-                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                          className="min-h-11 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
                         >
                           {t('common.cancel')}
                         </button>
@@ -265,7 +266,7 @@ export function ContributionList({ users, contributions, year, isAdmin }: Contri
                             setEditingId(entry.id)
                             setActionError(null)
                           }}
-                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                          className="min-h-11 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
                         >
                           {t('common.edit')}
                         </button>
@@ -275,7 +276,7 @@ export function ContributionList({ users, contributions, year, isAdmin }: Contri
                             setConfirmingId(entry.id)
                             setActionError(null)
                           }}
-                          className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50"
+                          className="min-h-11 rounded-lg border border-red-200 px-3 text-xs font-medium text-red-700 transition-colors hover:bg-red-50"
                         >
                           {t('common.delete')}
                         </button>

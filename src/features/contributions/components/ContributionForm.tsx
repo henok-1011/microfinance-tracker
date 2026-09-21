@@ -9,7 +9,7 @@ import { formatETB } from '@/lib/format'
 import type { Contribution, Target, UserProfile } from '@/lib/types'
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
+  'mt-1 min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
 const labelClass = 'block text-sm font-medium text-slate-700'
 
 interface ContributionFormProps {
@@ -224,7 +224,7 @@ export function ContributionForm({
       <button
         type="submit"
         disabled={submitting}
-        className="mt-4 w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+        className="mt-4 min-h-11 w-full rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
       >
         {submitting ? t('common.saving') : t('admin.contributions.save')}
       </button>

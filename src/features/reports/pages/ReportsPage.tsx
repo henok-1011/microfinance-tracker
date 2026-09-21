@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Spinner } from '@/components/ui/Spinner'
+import { ErrorState } from '@/components/ui/ErrorState'
+import { ListSkeleton } from '@/components/ui/Skeleton'
 import { YearSelect } from '@/components/ui/YearSelect'
 import { useContributions } from '@/features/contributions/hooks'
 import { useLoans, useRepayments } from '@/features/loans/hooks'
@@ -13,15 +14,21 @@ import { todayIso } from '@/lib/calc'
 
 export function ReportsPage() {
   const { t } = useTranslation()
-  const { data: users, loading: usersLoading, error: usersError } = useUsers()
-  const { data: targets } = useTargets()
+  const { data: users, loading: usersLoading, error: usersError, reload: reloadUsers } = useUsers()
+  const { data: targets, reload: reloadTargets } = useTargets()
   const {
     data: contributions,
     loading: contributionsLoading,
     error: contributionsError,
+    reload: reloadContributions,
   } = useContributions()
-  const { data: loans, loading: loansLoading, error: loansError } = useLoans()
-  const { data: repayments, loading: repaymentsLoading, error: repaymentsError } = useRepayments()
+  const { data: loans, loading: loansLoading, error: loansError, reload: reloadLoans } = useLoans()
+  const {
+    data: repayments,
+    loading: repaymentsLoading,
+    error: repaymentsError,
+    reload: reloadRepayments,
+  } = useRepayments()
 
   const [year, setYear] = useState(() => new Date().getFullYear())
 
@@ -41,12 +48,24 @@ export function ReportsPage() {
         </div>
       </div>
 
-      {loading ? <Spinner label={t('common.loading')} /> : null}
+      {loading ? (
+        <div className="mt-4">
+          <ListSkeleton />
+        </div>
+      ) : null}
 
       {!loading && error ? (
-        <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-          {t('common.error')}
-        </p>
+        <div className="mt-4">
+          <ErrorState
+            onRetry={() => {
+              reloadUsers()
+              reloadTargets()
+              reloadContributions()
+              reloadLoans()
+              reloadRepayments()
+            }}
+          />
+        </div>
       ) : null}
 
       {!loading && !error ? (

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import { LoanDetail } from '@/features/loans/components/LoanDetail'
 import { loansWithBalance } from '@/lib/calc'
 import { formatETB } from '@/lib/format'
@@ -22,11 +23,7 @@ export function LoanList({ loans, repayments, today }: LoanListProps) {
   )
 
   if (entries.length === 0) {
-    return (
-      <p className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
-        {t('admin.loans.empty')}
-      </p>
-    )
+    return <EmptyState message={t('admin.loans.empty')} />
   }
 
   return (
@@ -87,7 +84,7 @@ export function LoanList({ loans, repayments, today }: LoanListProps) {
                 type="button"
                 onClick={() => setExpandedId(expanded ? null : loan.id)}
                 aria-expanded={expanded}
-                className="mt-3 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                className="mt-3 min-h-11 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
               >
                 {expanded ? t('common.hide') : t('admin.loans.details')}
               </button>
