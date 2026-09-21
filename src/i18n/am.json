@@ -1,0 +1,74 @@
+{
+  "app": {
+    "title": "ማይክሮፋይናንስ"
+  },
+  "common": {
+    "loading": "በመጫን ላይ…",
+    "saving": "በማስቀመጥ ላይ…",
+    "save": "አስቀምጥ",
+    "cancel": "ተው",
+    "edit": "አስተካክል",
+    "delete": "ሰርዝ",
+    "error": "ውሂብ ማምጣት አልተቻለም። እንደገና ይሞክሩ።"
+  },
+  "auth": {
+    "signIn": "ግባ",
+    "signOut": "ውጣ",
+    "subtitle": "በመዝገብዎ ይግቡ",
+    "email": "ኢሜይል",
+    "password": "የይለፍ ቃል",
+    "errors": {
+      "invalidEmail": "ትክክለኛ ኢሜይል ያስገቡ።",
+      "missingPassword": "የይለፍ ቃልዎን ያስገቡ።",
+      "userDisabled": "ይህ መዝገብ ተሰናክሏል።",
+      "invalidCredentials": "ኢሜይል ወይም የይለፍ ቃል ትክክል አይደለም።",
+      "tooManyRequests": "ብዙ ሙከራዎች ተደርገዋል። በኋላ ይሞክሩ።",
+      "network": "የኔትወርክ ችግር። ግንኙነትዎን ያረጋግጡ።",
+      "generic": "ስህተት ተፈጥሯል። እንደገና ይሞክሩ።"
+    }
+  },
+  "reports": {
+    "dashboard": "ዳሽቦርድ",
+    "placeholder": "ሪፖርቶች በደረጃ 6 ይተገበራሉ።"
+  },
+  "admin": {
+    "users": {
+      "title": "የተጠቃሚ አስተዳደር",
+      "summary": "ተጠቃሚዎችን ይጨምሩ እና የዓመት ግቦችን ያስቀምጡ።",
+      "add": "ተጠቃሚ ጨምር",
+      "create": "ተጠቃሚ ፍጠር",
+      "edit": "ተጠቃሚ አስተካክል",
+      "empty": "እስካሁን ተጠቃሚ የለም። የመጀመሪያውን ይጨምሩ።",
+      "name": "ስም",
+      "email": "ኢሜይል",
+      "password": "የይለፍ ቃል",
+      "phone": "ስልክ",
+      "active": "ንቁ",
+      "inactive": "የተሰናከለ",
+      "year": "ዓመት",
+      "targetForYear": "የ{{year}} ግብ (ብር)",
+      "confirmDelete": "ይህ ተጠቃሚ ይሰረዝ?",
+      "roles": {
+        "admin": "አስተዳዳሪ",
+        "user": "ተጠቃሚ"
+      },
+      "errors": {
+        "required": "ስም፣ ኢሜይል እና የይለፍ ቃል ያስፈልጋሉ።",
+        "nameRequired": "ስም ያስገቡ።",
+        "invalidTarget": "0 ወይም ከዚያ በላይ የሆነ ግብ ያስገቡ።",
+        "network": "አገልጋዩ አልተገኘም። የተጠቃሚ አስተዳደር እንዲሰራ በ`vercel dev` ያሂዱ።",
+        "generic": "ስህተት ተፈጥሯል። እንደገና ይሞክሩ።"
+      }
+    }
+  },
+  "notFound": {
+    "title": "ገጹ አልተገኘም",
+    "message": "የፈለጉት ገጽ አይገኝም።",
+    "goHome": "ወደ መነሻ ተመለስ"
+  },
+  "nav": {
+    "home": "መነሻ",
+    "reports": "ሪፖርቶች",
+    "loans": "ብድሮች"
+  }
+}
