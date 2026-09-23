@@ -24,6 +24,8 @@ Internal role-based microfinance tracker. React 19 + Vite 8 + TS 6 + Tailwind v4
 - `src/features/<domain>/service.ts` + `hooks.ts` — Firestore reads/writes and realtime hooks per domain. Dates are stored as ISO `yyyy-mm-dd` strings (not Timestamps) to keep the calc engine deterministic.
 - `src/lib/firebase.ts` — client SDK init; connects to emulators when `VITE_USE_FIREBASE_EMULATORS=true`.
 - `api/` — Vercel serverless functions using `firebase-admin`. `api/_lib/` is shared and not routed. Privileged ops (user creation, role changes) live here, never in the browser.
+- **Relative imports in `api/` need explicit `.js` extensions.** Vercel typechecks the functions under nodenext rules (the package is `type: module`), while the repo's own `tsc -b` uses bundler resolution — extensionless imports pass locally and deploy broken. `../../src/lib/phone.js` style resolves back to the `.ts` source. See DEPLOYMENT.md.
+- **`package.json` pins `jwks-rsa` to 3.2.2 via `overrides`** — firebase-admin's own 4.x pulls ESM-only `jose` v6, which crashes every `/api` function at cold start on Vercel with `ERR_REQUIRE_ESM`. Don't remove the override; see DEPLOYMENT.md.
 - `scripts/seed-admin.mjs` / `seed-admin-emulator.mjs` — one-off admin bootstrap via Admin SDK (real project / emulators).
 - `scripts/dev-api-plugin.ts` — dev-only Vite plugin that mounts the `api/**` handlers on the dev server; excluded from the build by `apply: 'serve'`.
 - `firestore.rules` / `firestore.indexes.json` — deploy with the Firebase CLI.

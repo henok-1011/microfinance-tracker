@@ -49,8 +49,9 @@ firebase use --add        # pick your project; writes .firebaserc
 firebase deploy --only firestore:rules,firestore:indexes
 ```
 
-`.firebaserc` ships with a placeholder project id, so `firebase use --add` (or
-editing that file) is required before any `firebase deploy` will work.
+`.firebaserc` now points at the live project id. For a fresh clone, `firebase
+use --add` (or editing that file) selects the project before any `firebase
+deploy` will work.
 
 Let the indexes finish building. **Firestore → Indexes** shows their state.
 
@@ -175,3 +176,12 @@ In order, on the deployed URL:
   build time.
 - `.firebaserc` still holding the placeholder project id, so `firebase deploy`
   writes to the wrong project or fails.
+- **Vercel typechecks `api/` under nodenext rules** (the package is `type:
+module`): relative imports there need explicit `.js` extensions or the admin
+  functions deploy broken with only build-log TS2835/TS5097 errors. `tsc -b`
+  alone will not catch this — the repo's own config uses `bundler` resolution.
+- **`firebase-admin` needs `jwks-rsa` pinned to 3.x** (see `package.json`
+  `overrides`): 4.x require()s ESM-only `jose` v6, which crashes every `/api`
+  function at module load with `ERR_REQUIRE_ESM` on Vercel's runtime. The
+  symptom is a 500 `FUNCTION_INVOCATION_FAILED` on any admin endpoint, even
+  unauthenticated ones. Don't remove the override.
