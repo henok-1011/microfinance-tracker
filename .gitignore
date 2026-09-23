@@ -36,3 +36,6 @@ ui-debug.log
 *.sw?
 
 .vercel
+
+# Local agent session data
+.freebuff/
