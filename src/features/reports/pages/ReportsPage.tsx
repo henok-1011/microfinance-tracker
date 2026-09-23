@@ -1,16 +1,18 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { DateRangeFilter } from '@/components/ui/DateRangeFilter'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { ListSkeleton } from '@/components/ui/Skeleton'
-import { YearSelect } from '@/components/ui/YearSelect'
+import { RecentContributions } from '@/features/contributions/components/RecentContributions'
 import { useContributions } from '@/features/contributions/hooks'
 import { useLoans, useRepayments } from '@/features/loans/hooks'
-import { ContributionsReportTable } from '@/features/reports/components/ContributionsReportTable'
-import { LoanReportTable } from '@/features/reports/components/LoanReportTable'
+import { ContributionsLogTable } from '@/features/reports/components/ContributionsLogTable'
 import { PoolSummaryCards } from '@/features/reports/components/PoolSummaryCards'
+import { RepaymentsLogTable } from '@/features/reports/components/RepaymentsLogTable'
+import { useDateRange } from '@/features/reports/useDateRange'
 import { useTargets, useUsers } from '@/features/users/hooks'
-import { todayIso } from '@/lib/calc'
+import { maxIso } from '@/lib/calc'
+import { todayIso } from '@/lib/clock'
 
 export function ReportsPage() {
   const { t } = useTranslation()
@@ -30,22 +32,22 @@ export function ReportsPage() {
     reload: reloadRepayments,
   } = useRepayments()
 
-  const [year, setYear] = useState(() => new Date().getFullYear())
+  const { range, setRange } = useDateRange()
 
   const today = todayIso()
+  // Replay each loan up to whichever is later, so a period ending in the future
+  // still allocates every repayment inside it.
+  const ledgerAsOf = maxIso(today, range.to)
   const loading = usersLoading || contributionsLoading || loansLoading || repaymentsLoading
   const error = usersError ?? contributionsError ?? loansError ?? repaymentsError
 
   return (
     <section>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-slate-900">{t('reports.title')}</h2>
-          <p className="mt-1 text-sm text-slate-600">{t('reports.summary')}</p>
-        </div>
-        <div className="shrink-0 pt-0.5">
-          <YearSelect value={year} onChange={setYear} />
-        </div>
+      <h2 className="text-lg font-semibold text-slate-900">{t('reports.title')}</h2>
+      <p className="mt-1 text-sm text-slate-600">{t('reports.summary')}</p>
+
+      <div className="mt-3">
+        <DateRangeFilter range={range} onChange={setRange} />
       </div>
 
       {loading ? (
@@ -77,21 +79,30 @@ export function ReportsPage() {
               contributions={contributions}
               loans={loans}
               repayments={repayments}
-              year={year}
+              range={range}
             />
           </div>
 
           <div className="mt-6">
-            <ContributionsReportTable
+            <RecentContributions users={users} contributions={contributions} />
+          </div>
+
+          <div className="mt-6">
+            <ContributionsLogTable
+              contributions={contributions}
               users={users}
               targets={targets}
-              contributions={contributions}
-              year={year}
+              range={range}
             />
           </div>
 
           <div className="mt-6">
-            <LoanReportTable loans={loans} repayments={repayments} asOf={today} />
+            <RepaymentsLogTable
+              loans={loans}
+              repayments={repayments}
+              range={range}
+              asOf={ledgerAsOf}
+            />
           </div>
         </>
       ) : null}
