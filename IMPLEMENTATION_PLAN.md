@@ -11,32 +11,32 @@
 ### Stack
 
 - **Frontend:** Vite + React 19 + TypeScript, Tailwind CSS v4 (`@tailwindcss/vite`), React Router, react-i18next.
-- **Backend:** Firebase Auth (email/password) + Firestore (realtime `onSnapshot`). Roles stored as **Firebase custom claims** (`role`).
+- **Backend:** Firebase Auth + Firestore (realtime `onSnapshot`). Sign-in is **phone number + password**; Firebase has no such credential, so `src/lib/phone.ts` maps a normalised number to an internal address and the email/password provider authenticates that. Roles stored as **Firebase custom claims** (`role`).
 - **Serverless:** Vercel serverless functions under `/api` using `firebase-admin` (service-account JSON via `FIREBASE_SERVICE_ACCOUNT`).
 - **Hosting:** Vercel (React build + `/api` functions). Firebase is data/auth only.
 - **Testing:** Vitest (jsdom for UI, node for emulator rules tests). Oxlint + Prettier. Firebase Emulator Suite.
 
 ### Data model (Firestore)
 
-| Collection                | Key fields                                                                                              | Read          | Write      |
-| ------------------------- | ------------------------------------------------------------------------------------------------------- | ------------- | ---------- |
-| `users/{uid}`             | name, email, phone, role, expectedYearly, active, createdAt                                             | any signed-in | admin only |
-| `targets/{userId}_{year}` | userId, year, amount                                                                                    | any signed-in | admin only |
-| `contributions/{id}`      | userId, year, amount, date, note, recordedBy, createdAt                                                 | any signed-in | admin only |
-| `loans/{id}`              | borrowerName, borrowerPhone, principal, annualRatePct, startDate, dueDate, status, createdBy, createdAt | any signed-in | admin only |
-| `repayments/{id}`         | loanId, amount, date, recordedBy, createdAt                                                             | any signed-in | admin only |
+| Collection                | Key fields                                                                                               | Read          | Write      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- | ------------- | ---------- |
+| `users/{uid}`             | name, phone, role, expectedYearly, active, createdAt                                                     | any signed-in | admin only |
+| `targets/{userId}_{year}` | userId, year, amount                                                                                     | any signed-in | admin only |
+| `contributions/{id}`      | userId, year, amount, date, note, recordedBy, createdAt                                                  | any signed-in | admin only |
+| `loans/{id}`              | borrowerName, borrowerPhone, principal, monthlyRatePct, startDate, dueDate, status, createdBy, createdAt | any signed-in | admin only |
+| `repayments/{id}`         | loanId, amount, date, recordedBy, createdAt                                                              | any signed-in | admin only |
 
 Dates are stored as ISO `yyyy-mm-dd` strings (not Timestamps) so the pure calc engine is deterministic.
 
 ### Pure calculation engine (`src/lib/calc/`) — all unit-tested, no React/Firebase deps
 
 - `money.ts`: `round2`, `sum`.
-- `date.ts`: `toUtcMillis`, `daysBetween` (UTC, DST-safe, clamps negatives), `todayIso`, `compareIso`, `maxIso`.
+- `date.ts`: `toUtcMillis`, `daysBetween` (UTC, DST-safe, clamps negatives), `addMonths`, `monthsBetween`, `compareIso`, `maxIso`, `minIso`. **No clock**: "today" lives in `src/lib/clock.ts`, which syncs the server date via `/api/time` before the first render.
 - `contributions.ts`: `summarizeUser`, `summarizeContributions` (year-scoped), `totalExpected`, `totalContributed`.
-- `loans.ts`: `accrueInterest`, `loanBalanceAt(loan, repayments, asOf)` — replays repayments date-ordered, accrues **simple interest** on outstanding principal (365-day basis, segmented between events), applies payments **interest-first then principal**, clamps overpayments, returns `LoanBalance` (principal/interest outstanding, paid totals, per-repayment allocations, `isPaid`).
+- `loans.ts`: `accrueInterest`, `loanBalanceAt(loan, repayments, asOf)` — replays repayments date-ordered, accrues **simple interest** on outstanding principal (monthly rate, segmented between events and frozen at the due date), applies payments **interest-first then principal**, clamps overpayments, returns `LoanBalance` (principal/interest outstanding, paid totals, per-repayment allocations, `isPaid`).
 - `pool.ts`: `summarizePool` → `{ totalExpected, totalContributed, outstandingContributions, totalDisbursed, totalRepaid, interestEarned, loanBookOutstanding, cashOnHand, projectedPool }`.
 
-**Interest model (verified):** simple, no compounding. `interest = principal × rate/100 × days/365`, rounded to 2 decimals at each accrual segment. If a repayment arrives, accrued interest is satisfied first; the remainder reduces principal. A live balance also accrues from the last event up to `asOf`.
+**Interest model (verified):** simple, no compounding, charged **per month** of the term. `interest = principal × monthlyRate/100 × months`, rounded to 2 decimals at each accrual segment, where `months` is whole calendar months plus leftover days prorated at 1/30 each (so 1 Jan → 1 Jun is exactly 5 months). If a repayment arrives, accrued interest is satisfied first; the remainder reduces principal. Accrual stops at the loan's due date, so an overdue loan never exceeds its agreed total. A live balance accrues from the last event up to `asOf`.
 
 ### Auth & routing (`src/features/auth/`)
 
@@ -82,8 +82,8 @@ Admin-only writes; any signed-in user reads. Custom claim `role` is enforced. Ru
 - **`service.ts`** (extend): `deleteUser(uid)` calls `adminAuth.deleteUser` via a new serverless endpoint (never client-side Admin SDK), then deletes the `users/{uid}` doc. Also `setUserActive`.
 - **`hooks.ts`** (exists): `useUsers` returns `{ data, loading, error }`.
 - **Pages/form components:**
-  - **User list page** (`src/features/users/pages/UserListPage.tsx`): table/card list of users (name, email, role, expected yearly, active toggle). Each row has an edit button and a delete button (admin only). Mobile: card list.
-  - **Create user form** (`src/features/users/components/CreateUserForm.tsx`): fields name, email, password, phone, initial expected yearly. Calls `postJson('/api/admin/create-user', ...)` with bearer token from `useAuth`. Shows error messages mapped through `authErrorKey`.
+  - **User list page** (`src/features/users/pages/UserListPage.tsx`): table/card list of users (name, phone, role, expected yearly, active toggle). Each row has an edit button and a delete button (admin only). Mobile: card list.
+  - **Create user form** (`src/features/users/components/CreateUserForm.tsx`): fields name, phone, password, role (admin or user), initial expected yearly. Calls `postJson('/api/admin/create-user', ...)` with bearer token from `useAuth`. Shows error messages mapped through `authErrorKey`.
   - **Edit user modal/page** (`src/features/users/components/EditUserForm.tsx`): editable name, phone, expected yearly, active toggle. Calls `PUT /api/admin/update-user`.
   - **Set yearly target** inline in the user row or a dedicated `TargetInput`. Calls `setYearlyTarget(userId, year, amount)` (client-side write is admin-only via rules).
 - **Routing:** `/admin/users` already wired under `RequireRole role="admin"`.
@@ -161,7 +161,7 @@ Admin-only writes; any signed-in user reads. Custom claim `role` is enforced. Ru
 #### 5.2 UI components
 
 - **Add loan form** (`src/features/loans/components/AddLoanForm.tsx`):
-  - Fields: borrower name, phone, principal, annual rate %, start date, due date.
+  - Fields: borrower name, phone, principal, monthly rate %, start date, due date.
   - Live preview: projected total due (principal + interest from start to due using `loanBalanceAt`). Show `ETB { amount }` formatted.
   - Calls `addLoan` directly (Firestore admin-only write).
 - **Loan list** (`src/features/loans/components/LoanList.tsx`):
@@ -195,22 +195,17 @@ Admin-only writes; any signed-in user reads. Custom claim `role` is enforced. Ru
 
 #### 6.1 Reports page (`src/features/reports/pages/ReportsPage.tsx`)
 
-- **Contributions report:**
-  - Table: user | target | contributed | remaining | progress %.
-  - Totals row: total expected, total contributed, overall progress.
-  - Year selector (default current year).
-  - Use `summarizeContributions(targets, contributions, year)` and `totalExpected`/`totalContributed`.
-- **Loan report:**
-  - Table: borrower | principal | rate | start | due | paid amount | outstanding | status.
-  - Totals: total disbursed, total repaid, total interest earned, total outstanding.
-  - Use `loanBalanceAt` per loan for live outstanding.
+- **Contributions log** (`ContributionsLogTable`): one row per payment, newest first — date | member | amount | note. Totals row: entry count and the period's total. Built by `contributionLog`.
+- **Repayments log** (`RepaymentsLogTable`): one row per repayment, newest first — date | borrower | paid | interest | principal | balance after. Totals row: the period's repaid/interest/principal. Built by `repaymentLog`, which replays each loan's full history so the split matches the loan book.
+- Both are filtered by the shared reporting period (a date range, not a year), paginated (`usePagination`, 10 per page), and exportable to CSV.
+- Per-member progress (`summarizeContributions`) and the pool summary live on **Home**; the reports page is the ledger view.
 - **Pool summary (the headline numbers):**
   - Cash on hand = `totalContributed − totalDisbursed + totalRepaid`.
   - Outstanding contributions (targets not yet paid).
   - Loan book outstanding (principal + accrued interest).
   - Projected final pool = `cashOnHand + outstandingContributions + projectedLoanOutstandingAtDue`.
   - Interest earned to date.
-  - Use `summarizePool(targets, contributions, loans, repayments, todayIso, year)`.
+  - Use `summarizePool(targets, contributions, loans, repayments, todayIso(), range)`.
 
 #### 6.2 Mobile-first design
 
@@ -298,7 +293,7 @@ Admin-only writes; any signed-in user reads. Custom claim `role` is enforced. Ru
 
 1. Replace `.firebaserc` placeholder project id with the real project id.
 2. Enable **Email/Password** auth in Firebase Console → Authentication → Sign-in method.
-3. Seed the admin account: `FIREBASE_SERVICE_ACCOUNT_PATH=... ADMIN_EMAIL=... ADMIN_PASSWORD=... npm run seed:admin` (or run `scripts/seed-admin.mjs`).
+3. Seed the admin account: `FIREBASE_SERVICE_ACCOUNT_PATH=... ADMIN_PHONE=... ADMIN_PASSWORD=... npm run seed:admin` (or run `scripts/seed-admin.mjs`). See `DEPLOYMENT.md` for the full deploy.
    - Add npm script `"seed:admin": "node --loader ts-node/esm scripts/seed-admin.mjs"` or just `node scripts/seed-admin.mjs` with env vars. The `.mjs` uses ESM, so `node scripts/seed-admin.mjs` works directly.
 4. Deploy Firestore rules and indexes: `firebase deploy --only firestore:rules,firestore:indexes`.
 5. Optionally enable **App Check** (recommended for production) — requires a provider (e.g., Play Integrity, App Check with debug provider for dev).
