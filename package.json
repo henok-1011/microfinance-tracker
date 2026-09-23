@@ -28,6 +28,9 @@
     "react-i18next": "^17.0.14",
     "react-router-dom": "^7.18.4"
   },
+  "overrides": {
+    "jwks-rsa": "3.2.2"
+  },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/vite": "^4.3.3",
