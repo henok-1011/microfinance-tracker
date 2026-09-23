@@ -9,7 +9,7 @@ function loan(overrides: Partial<Loan> = {}): Loan {
     borrowerName: 'Borrower',
     borrowerPhone: '',
     principal: 1000,
-    annualRatePct: 12,
+    monthlyRatePct: 1,
     startDate: '2026-01-01',
     dueDate: '2026-12-31',
     status: 'active',
@@ -31,57 +31,108 @@ function repayment(date: string, amount: number, loanId = 'L1'): Repayment {
 }
 
 describe('accrueInterest', () => {
-  it('computes simple interest on principal for a day count', () => {
-    expect(accrueInterest(1000, 12, 30)).toBe(9.86)
+  it('charges the monthly rate once per month elapsed', () => {
+    expect(accrueInterest(1000, 5, 2)).toBe(100)
+    expect(accrueInterest(200000, 5, 5)).toBe(50000)
+  })
+
+  it('returns zero for a zero principal, rate, or term', () => {
     expect(accrueInterest(1000, 0, 30)).toBe(0)
-    expect(accrueInterest(0, 12, 30)).toBe(0)
-    expect(accrueInterest(1000, 12, 0)).toBe(0)
+    expect(accrueInterest(0, 5, 30)).toBe(0)
+    expect(accrueInterest(1000, 5, 0)).toBe(0)
+  })
+
+  it('rounds to two decimals', () => {
+    expect(accrueInterest(1000, 1, 10 / 30)).toBe(3.33)
   })
 })
 
 describe('loanBalanceAt', () => {
-  it('accrues interest with no repayments', () => {
-    const balance = loanBalanceAt(loan(), [], '2026-01-31')
+  it('accrues one month of interest per month elapsed', () => {
+    const balance = loanBalanceAt(loan(), [], '2026-02-01')
     expect(balance.principalOutstanding).toBe(1000)
-    expect(balance.interestOutstanding).toBe(9.86)
-    expect(balance.totalOutstanding).toBe(1009.86)
+    expect(balance.interestOutstanding).toBe(10)
+    expect(balance.totalOutstanding).toBe(1010)
     expect(balance.isPaid).toBe(false)
   })
 
+  it('matches the flat monthly rate a lender quotes for the term', () => {
+    // 200,000 at 5% a month for five months is 50,000 of interest.
+    const balance = loanBalanceAt(
+      loan({
+        principal: 200000,
+        monthlyRatePct: 5,
+        startDate: '2026-01-01',
+        dueDate: '2026-06-01',
+      }),
+      [],
+      '2026-06-01',
+    )
+    expect(balance.interestOutstanding).toBe(50000)
+    expect(balance.totalOutstanding).toBe(250000)
+  })
+
+  it('prorates the leftover days of a partial month', () => {
+    // Ten days past the anniversary is a third of a month, not a whole one.
+    expect(loanBalanceAt(loan(), [], '2026-01-11').interestOutstanding).toBe(3.33)
+    expect(loanBalanceAt(loan(), [], '2026-02-11').interestOutstanding).toBe(13.33)
+  })
+
   it('applies a partial repayment interest-first, then principal', () => {
-    const balance = loanBalanceAt(loan(), [repayment('2026-01-31', 500)], '2026-01-31')
+    const balance = loanBalanceAt(loan(), [repayment('2026-02-01', 500)], '2026-02-01')
     expect(balance.allocations).toHaveLength(1)
     expect(balance.allocations[0]).toMatchObject({
-      interestPortion: 9.86,
-      principalPortion: 490.14,
-      balanceAfter: 509.86,
+      interestPortion: 10,
+      principalPortion: 490,
+      balanceAfter: 510,
     })
-    expect(balance.principalOutstanding).toBe(509.86)
+    expect(balance.principalOutstanding).toBe(510)
     expect(balance.interestOutstanding).toBe(0)
-    expect(balance.totalOutstanding).toBe(509.86)
+    expect(balance.totalOutstanding).toBe(510)
   })
 
   it('keeps accruing on the reduced principal', () => {
-    const repayments = [repayment('2026-01-31', 500)]
-    const balance = loanBalanceAt(loan(), repayments, '2026-03-02')
-    expect(balance.interestOutstanding).toBe(5.03)
-    expect(balance.totalOutstanding).toBe(514.89)
+    const repayments = [repayment('2026-02-01', 500)]
+    const balance = loanBalanceAt(loan(), repayments, '2026-04-01')
+    expect(balance.interestOutstanding).toBe(10.2)
+    expect(balance.totalOutstanding).toBe(520.2)
   })
 
   it('marks a loan paid when principal and interest reach zero', () => {
-    const balance = loanBalanceAt(loan(), [repayment('2026-01-31', 1009.86)], '2026-01-31')
+    const balance = loanBalanceAt(loan(), [repayment('2026-02-01', 1010)], '2026-02-01')
     expect(balance.totalOutstanding).toBe(0)
     expect(balance.isPaid).toBe(true)
-    expect(balance.interestPaid).toBe(9.86)
+    expect(balance.interestPaid).toBe(10)
     expect(balance.principalPaid).toBe(1000)
-    expect(balance.totalPaid).toBe(1009.86)
+    expect(balance.totalPaid).toBe(1010)
+  })
+
+  it('stops accruing at the due date, however late the loan is viewed', () => {
+    const due = loan({ dueDate: '2026-03-01' })
+    const atDue = loanBalanceAt(due, [], '2026-03-01')
+    const monthsLater = loanBalanceAt(due, [], '2026-12-31')
+
+    expect(atDue.interestOutstanding).toBe(20)
+    expect(monthsLater.interestOutstanding).toBe(20)
+    expect(monthsLater.totalOutstanding).toBe(atDue.totalOutstanding)
+  })
+
+  it('charges nothing for the time an overdue repayment spends past the due date', () => {
+    const due = loan({ dueDate: '2026-03-01' })
+    // Two months of interest, then a payment three months after the term ended.
+    const balance = loanBalanceAt(due, [repayment('2026-06-01', 500)], '2026-06-01')
+    expect(balance.interestPaid).toBe(20)
+    expect(balance.interestOutstanding).toBe(0)
+    expect(balance.principalPaid).toBe(480)
+    // 1000 of principal + 20 of interest - the 500 paid.
+    expect(balance.totalOutstanding).toBe(520)
   })
 
   it('accrues nothing when the rate is zero', () => {
     const balance = loanBalanceAt(
-      loan({ annualRatePct: 0 }),
-      [repayment('2026-01-31', 400)],
-      '2026-01-31',
+      loan({ monthlyRatePct: 0 }),
+      [repayment('2026-02-01', 400)],
+      '2026-02-01',
     )
     expect(balance.interestAccrued).toBe(0)
     expect(balance.totalOutstanding).toBe(600)
@@ -89,9 +140,9 @@ describe('loanBalanceAt', () => {
 
   it('clamps overpayment and ignores the excess', () => {
     const balance = loanBalanceAt(
-      loan({ annualRatePct: 0 }),
-      [repayment('2026-01-31', 1500)],
-      '2026-01-31',
+      loan({ monthlyRatePct: 0 }),
+      [repayment('2026-02-01', 1500)],
+      '2026-02-01',
     )
     expect(balance.principalOutstanding).toBe(0)
     expect(balance.totalOutstanding).toBe(0)
@@ -100,7 +151,7 @@ describe('loanBalanceAt', () => {
 
   it('processes repayments in date order regardless of input order', () => {
     const balance = loanBalanceAt(
-      loan({ annualRatePct: 0 }),
+      loan({ monthlyRatePct: 0 }),
       [repayment('2026-02-15', 100), repayment('2026-01-31', 100)],
       '2026-02-15',
     )
@@ -113,9 +164,9 @@ describe('loanBalanceAt', () => {
 
   it('ignores repayments for other loans', () => {
     const balance = loanBalanceAt(
-      loan({ annualRatePct: 0 }),
-      [repayment('2026-01-31', 500, 'L2')],
-      '2026-01-31',
+      loan({ monthlyRatePct: 0 }),
+      [repayment('2026-02-01', 500, 'L2')],
+      '2026-02-01',
     )
     expect(balance.principalOutstanding).toBe(1000)
   })
@@ -133,7 +184,7 @@ describe('loanBalanceAt', () => {
 })
 
 describe('loansWithBalance', () => {
-  const settled = loan({ id: 'L2', dueDate: '2026-06-30', principal: 100, annualRatePct: 0 })
+  const settled = loan({ id: 'L2', dueDate: '2026-06-30', principal: 100, monthlyRatePct: 0 })
   const late = loan({ id: 'L3', dueDate: '2026-12-31' })
   const early = loan({ id: 'L4', dueDate: '2026-03-31' })
   const settleAll = repayment('2026-01-31', 100, 'L2')

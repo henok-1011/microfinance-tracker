@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 
 import { addLoan } from '@/features/loans/service'
 import { describeUserError } from '@/features/users/errors'
-import { compareIso, isIsoDate, loanBalanceAt, todayIso } from '@/lib/calc'
+import { compareIso, isIsoDate, loanBalanceAt } from '@/lib/calc'
+import { todayIso } from '@/lib/clock'
 import { formatETB } from '@/lib/format'
 import type { Loan } from '@/lib/types'
 
@@ -38,7 +39,7 @@ export function AddLoanForm() {
       borrowerName,
       borrowerPhone,
       principal: principalValue,
-      annualRatePct: rateValue,
+      monthlyRatePct: rateValue,
       startDate,
       dueDate,
       status: 'active',
@@ -92,7 +93,7 @@ export function AddLoanForm() {
         borrowerName: borrowerName.trim(),
         borrowerPhone: borrowerPhone.trim(),
         principal: principalValue,
-        annualRatePct: rateValue,
+        monthlyRatePct: rateValue,
         startDate,
         dueDate,
       })

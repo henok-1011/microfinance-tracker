@@ -11,7 +11,7 @@ export function mapLoan(id: string, data: Record<string, unknown>): Loan {
     borrowerName: String(data.borrowerName ?? ''),
     borrowerPhone: String(data.borrowerPhone ?? ''),
     principal: Number(data.principal ?? 0),
-    annualRatePct: Number(data.annualRatePct ?? 0),
+    monthlyRatePct: Number(data.monthlyRatePct ?? 0),
     startDate: String(data.startDate ?? ''),
     dueDate: String(data.dueDate ?? ''),
     status: data.status === 'paid' ? 'paid' : 'active',
@@ -35,7 +35,7 @@ export interface LoanInput {
   borrowerName: string
   borrowerPhone?: string
   principal: number
-  annualRatePct: number
+  monthlyRatePct: number
   startDate: string
   dueDate: string
 }
@@ -45,7 +45,7 @@ export async function addLoan(input: LoanInput): Promise<string> {
     borrowerName: input.borrowerName,
     borrowerPhone: input.borrowerPhone ?? '',
     principal: round2(input.principal),
-    annualRatePct: input.annualRatePct,
+    monthlyRatePct: input.monthlyRatePct,
     startDate: input.startDate,
     dueDate: input.dueDate,
     status: 'active',

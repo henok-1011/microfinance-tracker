@@ -63,7 +63,7 @@ export function LoanList({ loans, repayments, today }: LoanListProps) {
                 </div>
                 <div>
                   <dt className="text-[11px] text-slate-500">{t('admin.loans.rate')}</dt>
-                  <dd className="text-xs font-medium text-slate-900">{loan.annualRatePct}%</dd>
+                  <dd className="text-xs font-medium text-slate-900">{loan.monthlyRatePct}%</dd>
                 </div>
                 <div>
                   <dt className="text-[11px] text-slate-500">{t('admin.loans.outstanding')}</dt>

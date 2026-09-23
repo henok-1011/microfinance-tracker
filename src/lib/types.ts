@@ -3,7 +3,7 @@ export type Role = 'admin' | 'user'
 export interface UserProfile {
   uid: string
   name: string
-  email: string
+  /** The sign-in credential, stored as nine digits without a country code. */
   phone: string
   role: Role
   expectedYearly: number
@@ -36,7 +36,8 @@ export interface Loan {
   borrowerName: string
   borrowerPhone: string
   principal: number
-  annualRatePct: number
+  /** Interest charged per month of the term, as a percentage of the principal. */
+  monthlyRatePct: number
   startDate: string
   dueDate: string
   status: LoanStatus

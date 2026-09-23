@@ -1,18 +1,17 @@
 import type { Loan, Repayment } from '@/lib/types'
 
-import { compareIso, daysBetween } from './date'
+import { compareIso, minIso, monthsBetween } from './date'
 import { round2 } from './money'
 
-const DAYS_PER_YEAR = 365
 const PAID_EPSILON = 0.005
 
 /**
- * Simple interest for a single accrual segment. Interest accrues on the
- * outstanding principal only; there is no compounding.
+ * Simple interest for a single accrual segment, charged per month of the term.
+ * Interest accrues on the outstanding principal only; there is no compounding.
  */
-export function accrueInterest(principal: number, annualRatePct: number, days: number): number {
-  if (principal <= 0 || annualRatePct <= 0 || days <= 0) return 0
-  return round2((principal * (annualRatePct / 100) * days) / DAYS_PER_YEAR)
+export function accrueInterest(principal: number, monthlyRatePct: number, months: number): number {
+  if (principal <= 0 || monthlyRatePct <= 0 || months <= 0) return 0
+  return round2(principal * (monthlyRatePct / 100) * months)
 }
 
 export interface RepaymentAllocation {
@@ -38,11 +37,14 @@ export interface LoanBalance {
 
 /**
  * Replays a loan's repayments in date order, accruing simple interest on the
- * outstanding principal between events. Payments are applied interest-first,
- * then to principal. Interest accrues up to `asOf` for a live balance.
+ * outstanding principal between events. The rate is charged per calendar month,
+ * with leftover days prorated. Payments are applied interest-first, then to
+ * principal. Interest stops at the due date, so an overdue loan never grows
+ * past the term it was agreed on; it accrues up to `asOf` for a live balance.
  */
 export function loanBalanceAt(loan: Loan, repayments: Repayment[], asOf: string): LoanBalance {
   const cutoff = asOf.slice(0, 10)
+  const interestStop = loan.dueDate.slice(0, 10)
   const events = repayments
     .filter((entry) => entry.loanId === loan.id && entry.date.slice(0, 10) <= cutoff)
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
@@ -57,7 +59,11 @@ export function loanBalanceAt(loan: Loan, repayments: Repayment[], asOf: string)
   for (const repayment of events) {
     interest = round2(
       interest +
-        accrueInterest(principal, loan.annualRatePct, daysBetween(lastDate, repayment.date)),
+        accrueInterest(
+          principal,
+          loan.monthlyRatePct,
+          monthsBetween(lastDate, minIso(repayment.date, interestStop)),
+        ),
     )
 
     const payment = Math.max(0, repayment.amount)
@@ -81,7 +87,12 @@ export function loanBalanceAt(loan: Loan, repayments: Repayment[], asOf: string)
   }
 
   interest = round2(
-    interest + accrueInterest(principal, loan.annualRatePct, daysBetween(lastDate, asOf)),
+    interest +
+      accrueInterest(
+        principal,
+        loan.monthlyRatePct,
+        monthsBetween(lastDate, minIso(asOf, interestStop)),
+      ),
   )
 
   const totalOutstanding = round2(principal + interest)
