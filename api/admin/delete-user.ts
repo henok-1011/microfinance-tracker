@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-import { adminAuth } from '../_lib/firebaseAdmin'
-import { HttpError, requireAdmin } from '../_lib/requireAdmin'
+import { adminAuth } from '../_lib/firebaseAdmin.js'
+import { HttpError, requireAdmin } from '../_lib/requireAdmin.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {

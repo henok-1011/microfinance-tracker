@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-import { isPhoneValid, normalizePhone, phoneToAuthEmail } from '../../src/lib/phone.ts'
-import { adminAuth, adminDb } from '../_lib/firebaseAdmin'
-import { HttpError, requireAdmin } from '../_lib/requireAdmin'
+import { isPhoneValid, normalizePhone, phoneToAuthEmail } from '../../src/lib/phone.js'
+import { adminAuth, adminDb } from '../_lib/firebaseAdmin.js'
+import { HttpError, requireAdmin } from '../_lib/requireAdmin.js'
 
 type Role = 'admin' | 'user'
 

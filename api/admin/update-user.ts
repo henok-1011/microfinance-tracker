@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-import { adminAuth, adminDb } from '../_lib/firebaseAdmin'
-import { HttpError, requireAdmin } from '../_lib/requireAdmin'
+import { adminAuth, adminDb } from '../_lib/firebaseAdmin.js'
+import { HttpError, requireAdmin } from '../_lib/requireAdmin.js'
 
 /**
  * `phone` is deliberately absent: it is the sign-in credential, so changing it

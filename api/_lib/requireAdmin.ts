@@ -1,6 +1,6 @@
 import type { VercelRequest } from '@vercel/node'
 
-import { adminAuth } from './firebaseAdmin'
+import { adminAuth } from './firebaseAdmin.js'
 
 export class HttpError extends Error {
   status: number
