@@ -6,7 +6,7 @@ import { AddLoanForm } from '@/features/loans/components/AddLoanForm'
 import { LoanList } from '@/features/loans/components/LoanList'
 import { RecordRepaymentForm } from '@/features/loans/components/RecordRepaymentForm'
 import { useLoans, useRepayments } from '@/features/loans/hooks'
-import { todayIso } from '@/lib/calc'
+import { todayIso } from '@/lib/clock'
 
 export function LoansPage() {
   const { t } = useTranslation()

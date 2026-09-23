@@ -8,6 +8,7 @@ import { ContributionForm } from '@/features/contributions/components/Contributi
 import { ContributionList } from '@/features/contributions/components/ContributionList'
 import { useContributions } from '@/features/contributions/hooks'
 import { useTargets, useUsers } from '@/features/users/hooks'
+import { todayIso } from '@/lib/clock'
 
 export function ContributionsPage() {
   const { t } = useTranslation()
@@ -21,7 +22,7 @@ export function ContributionsPage() {
     reload: reloadContributions,
   } = useContributions()
 
-  const [year, setYear] = useState(() => new Date().getFullYear())
+  const [year, setYear] = useState(() => Number(todayIso().slice(0, 4)))
 
   const loading = usersLoading || contributionsLoading
   const error = usersError ?? contributionsError

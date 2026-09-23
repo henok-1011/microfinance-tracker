@@ -1,9 +1,11 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { todayIso } from '@/lib/clock'
+
 /** Next year plus the recent past, which is all the app is expected to need. */
 function recentYears(span = 2): number[] {
-  const current = new Date().getFullYear()
+  const current = Number(todayIso().slice(0, 4))
   return Array.from({ length: span + 2 }, (_, index) => current + 1 - index)
 }
 
