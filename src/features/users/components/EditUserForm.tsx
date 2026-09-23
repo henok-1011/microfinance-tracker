@@ -18,7 +18,6 @@ interface EditUserFormProps {
 export function EditUserForm({ user, onSaved, onCancel }: EditUserFormProps) {
   const { t } = useTranslation()
   const [name, setName] = useState(user.name)
-  const [phone, setPhone] = useState(user.phone)
   const [active, setActive] = useState(user.active)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -33,7 +32,7 @@ export function EditUserForm({ user, onSaved, onCancel }: EditUserFormProps) {
     setSaving(true)
     setError(null)
     try {
-      await updateUser(user.uid, { name: name.trim(), phone: phone.trim(), active })
+      await updateUser(user.uid, { name: name.trim(), active })
       onSaved()
     } catch (saveError) {
       setError(describeUserError(saveError, (key) => t(key)))
@@ -45,7 +44,7 @@ export function EditUserForm({ user, onSaved, onCancel }: EditUserFormProps) {
   return (
     <form onSubmit={handleSubmit}>
       <h3 className="text-sm font-semibold text-slate-900">{t('admin.users.edit')}</h3>
-      <p className="mt-0.5 truncate text-xs text-slate-500">{user.email}</p>
+      <p className="mt-0.5 truncate text-xs text-slate-500">{user.phone}</p>
 
       <label className={`mt-3 ${labelClass}`}>
         {t('admin.users.name')}
@@ -57,15 +56,11 @@ export function EditUserForm({ user, onSaved, onCancel }: EditUserFormProps) {
         />
       </label>
 
-      <label className={`mt-3 ${labelClass}`}>
-        {t('admin.users.phone')}
-        <input
-          type="tel"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-          className={inputClass}
-        />
-      </label>
+      {/* Read-only: the phone is the sign-in credential, so changing it has to
+          reissue the Auth account, which this form does not do. */}
+      <p className="mt-3 text-xs text-slate-500">
+        {t('admin.users.phoneLocked', { phone: user.phone })}
+      </p>
 
       <label className="mt-3 flex items-center gap-2 text-sm font-medium text-slate-700">
         <input

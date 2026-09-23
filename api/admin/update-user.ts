@@ -3,10 +3,13 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { adminAuth, adminDb } from '../_lib/firebaseAdmin'
 import { HttpError, requireAdmin } from '../_lib/requireAdmin'
 
+/**
+ * `phone` is deliberately absent: it is the sign-in credential, so changing it
+ * has to reissue the Auth account too, which this endpoint does not do.
+ */
 type UpdateUserBody = {
   uid?: string
   name?: string
-  phone?: string
   expectedYearly?: number
   active?: boolean
 }
@@ -20,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     await requireAdmin(req)
 
-    const { uid, name, phone, expectedYearly, active } = (req.body ?? {}) as UpdateUserBody
+    const { uid, name, expectedYearly, active } = (req.body ?? {}) as UpdateUserBody
     if (!uid) {
       res.status(400).json({ error: 'uid is required' })
       return
@@ -28,7 +31,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const patch: Record<string, unknown> = {}
     if (typeof name === 'string') patch.name = name.trim()
-    if (typeof phone === 'string') patch.phone = phone.trim()
     if (typeof expectedYearly === 'number' && Number.isFinite(expectedYearly)) {
       patch.expectedYearly = Math.max(0, expectedYearly)
     }

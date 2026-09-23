@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:emulator": "firebase emulators:exec --only firestore --project microfinance-test \"vitest run --config vitest.emulator.config.ts\"",
-    "emulators": "firebase emulators:start --project microfinance-test"
+    "emulators": "firebase emulators:start --project microfinance-test",
+    "seed:emulator": "node scripts/seed-admin-emulator.mjs"
   },
   "dependencies": {
     "firebase": "^12.19.0",

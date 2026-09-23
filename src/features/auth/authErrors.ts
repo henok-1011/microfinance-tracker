@@ -1,5 +1,5 @@
 const ERROR_KEYS: Record<string, string> = {
-  'auth/invalid-email': 'auth.errors.invalidEmail',
+  'auth/invalid-email': 'auth.errors.invalidPhone',
   'auth/missing-password': 'auth.errors.missingPassword',
   'auth/user-disabled': 'auth.errors.userDisabled',
   'auth/user-not-found': 'auth.errors.invalidCredentials',

@@ -3,6 +3,10 @@ import { useTranslation } from 'react-i18next'
 
 import { describeUserError } from '@/features/users/errors'
 import { createUser, setYearlyTarget } from '@/features/users/service'
+import { isPhoneValid } from '@/lib/phone'
+import type { Role } from '@/lib/types'
+
+const ROLES: Role[] = ['user', 'admin']
 
 const inputClass =
   'mt-1 min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100'
@@ -17,17 +21,21 @@ interface CreateUserFormProps {
 export function CreateUserForm({ year, onCreated, onCancel }: CreateUserFormProps) {
   const { t } = useTranslation()
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [phone, setPhone] = useState('')
+  const [password, setPassword] = useState('')
+  const [role, setRole] = useState<Role>('user')
   const [targetInput, setTargetInput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!name.trim() || !email.trim() || !password) {
+    if (!name.trim() || !phone.trim() || !password) {
       setError(t('admin.users.errors.required'))
+      return
+    }
+    if (!isPhoneValid(phone)) {
+      setError(t('admin.users.errors.phoneInvalid'))
       return
     }
 
@@ -39,9 +47,9 @@ export function CreateUserForm({ year, onCreated, onCancel }: CreateUserFormProp
     try {
       const { uid } = await createUser({
         name: name.trim(),
-        email: email.trim(),
-        password,
         phone: phone.trim(),
+        password,
+        role,
         expectedYearly,
       })
 
@@ -80,15 +88,20 @@ export function CreateUserForm({ year, onCreated, onCancel }: CreateUserFormProp
       </label>
 
       <label className={`mt-3 ${labelClass}`}>
-        {t('admin.users.email')}
+        {t('admin.users.phone')}
         <input
-          type="email"
+          type="tel"
+          inputMode="tel"
           autoComplete="off"
+          placeholder="0912345678"
           required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          value={phone}
+          onChange={(event) => setPhone(event.target.value)}
           className={inputClass}
         />
+        <span className="mt-1 block text-xs font-normal text-slate-500">
+          {t('admin.users.phoneHint')}
+        </span>
       </label>
 
       <label className={`mt-3 ${labelClass}`}>
@@ -105,13 +118,18 @@ export function CreateUserForm({ year, onCreated, onCancel }: CreateUserFormProp
       </label>
 
       <label className={`mt-3 ${labelClass}`}>
-        {t('admin.users.phone')}
-        <input
-          type="tel"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
+        {t('admin.users.role')}
+        <select
+          value={role}
+          onChange={(event) => setRole(event.target.value as Role)}
           className={inputClass}
-        />
+        >
+          {ROLES.map((option) => (
+            <option key={option} value={option}>
+              {t(`roles.${option}`)}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className={`mt-3 ${labelClass}`}>

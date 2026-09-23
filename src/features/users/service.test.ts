@@ -10,8 +10,7 @@ describe('mapUser', () => {
     expect(
       mapUser('uid-1', {
         name: 'Almaz',
-        email: 'almaz@example.com',
-        phone: '0911223344',
+        phone: '911223344',
         role: 'admin',
         expectedYearly: 12000,
         active: true,
@@ -20,8 +19,7 @@ describe('mapUser', () => {
     ).toEqual({
       uid: 'uid-1',
       name: 'Almaz',
-      email: 'almaz@example.com',
-      phone: '0911223344',
+      phone: '911223344',
       role: 'admin',
       expectedYearly: 12000,
       active: true,
@@ -33,7 +31,6 @@ describe('mapUser', () => {
     expect(mapUser('uid-2', {})).toEqual({
       uid: 'uid-2',
       name: '',
-      email: '',
       phone: '',
       role: 'user',
       expectedYearly: 0,

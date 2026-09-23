@@ -5,8 +5,10 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import {
   progressPercent,
   summarizeContributions,
+  targetYearForRange,
   totalContributed,
   totalExpected,
+  type DateRange,
 } from '@/lib/calc'
 import { formatETB } from '@/lib/format'
 import type { Contribution, Target, UserProfile } from '@/lib/types'
@@ -26,32 +28,40 @@ interface UserProgressCardsProps {
   users: UserProfile[]
   targets: Target[]
   contributions: Contribution[]
-  year: number
+  range: DateRange
 }
 
-export function UserProgressCards({ users, targets, contributions, year }: UserProgressCardsProps) {
+export function UserProgressCards({
+  users,
+  targets,
+  contributions,
+  range,
+}: UserProgressCardsProps) {
   const { t, i18n } = useTranslation()
 
   const summaries = useMemo(() => {
-    const nameById = new Map(users.map((user) => [user.uid, user.name || user.email]))
-    return summarizeContributions(targets, contributions, year)
+    const nameById = new Map(users.map((user) => [user.uid, user.name || user.phone]))
+    return summarizeContributions(targets, contributions, range)
       .map((summary) => ({ ...summary, name: nameById.get(summary.userId) ?? summary.userId }))
       .sort((a, b) => a.name.localeCompare(b.name))
-  }, [users, targets, contributions, year])
+  }, [users, targets, contributions, range])
 
-  const expected = totalExpected(targets, year)
-  const contributed = totalContributed(contributions, year)
+  const expected = totalExpected(targets, range)
+  const contributed = totalContributed(contributions, range)
   const overallPercent = progressPercent(expected > 0 ? contributed / expected : 0)
+  const targetYear = targetYearForRange(range)
 
   return (
     <section>
-      <h3 className="text-sm font-semibold text-slate-900">
-        {t('reports.progressTitle', { year })}
-      </h3>
+      <h3 className="text-sm font-semibold text-slate-900">{t('reports.progressTitle')}</h3>
+      <p className="mt-1 text-xs text-slate-500">
+        {t('reports.period', { from: range.from, to: range.to })} ·{' '}
+        {t('reports.targetsNote', { year: targetYear })}
+      </p>
 
       {summaries.length === 0 ? (
         <div className="mt-3">
-          <EmptyState message={t('reports.progressEmpty', { year })} />
+          <EmptyState message={t('reports.progressEmpty', { year: targetYear })} />
         </div>
       ) : (
         <>

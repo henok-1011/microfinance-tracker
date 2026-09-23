@@ -144,7 +144,7 @@ export function ContributionList({ users, contributions, year, isAdmin }: Contri
   const [actionError, setActionError] = useState<string | null>(null)
 
   const nameById = useMemo(
-    () => new Map(users.map((user) => [user.uid, user.name || user.email])),
+    () => new Map(users.map((user) => [user.uid, user.name || user.phone])),
     [users],
   )
 

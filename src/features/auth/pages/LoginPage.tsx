@@ -5,6 +5,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { LanguageToggle } from '@/components/LanguageToggle'
 import { authErrorKey } from '@/features/auth/authErrors'
 import { useAuth } from '@/features/auth/useAuth'
+import { isPhoneValid } from '@/lib/phone'
 
 type LocationState = { from?: string } | null
 
@@ -14,7 +15,7 @@ export function LoginPage() {
   const location = useLocation()
   const from = (location.state as LocationState)?.from ?? '/'
 
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [errorKey, setErrorKey] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -25,10 +26,17 @@ export function LoginPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    // Caught here rather than at the provider: an unnormalised number would
+    // otherwise be reported as a wrong password.
+    if (!isPhoneValid(phone)) {
+      setErrorKey('auth.errors.invalidPhone')
+      return
+    }
+
     setSubmitting(true)
     setErrorKey(null)
     try {
-      await signIn(email.trim(), password)
+      await signIn(phone, password)
     } catch (error) {
       setErrorKey(authErrorKey(error))
     } finally {
@@ -52,13 +60,15 @@ export function LoginPage() {
           <p className="mt-1 text-sm text-slate-500">{t('auth.subtitle')}</p>
 
           <label className="mt-5 block text-sm font-medium text-slate-700">
-            {t('auth.email')}
+            {t('auth.phone')}
             <input
-              type="email"
-              autoComplete="email"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder={t('auth.phonePlaceholder')}
               required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
               className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
             />
           </label>

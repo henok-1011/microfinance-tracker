@@ -9,7 +9,6 @@ export function mapUser(id: string, data: Record<string, unknown>): UserProfile 
   return {
     uid: id,
     name: String(data.name ?? ''),
-    email: String(data.email ?? ''),
     phone: String(data.phone ?? ''),
     role: data.role === 'admin' ? 'admin' : 'user',
     expectedYearly: Number(data.expectedYearly ?? 0),
@@ -41,9 +40,9 @@ export async function setYearlyTarget(userId: string, year: number, amount: numb
 
 export interface CreateUserInput {
   name: string
-  email: string
+  /** The sign-in credential, written however the admin prefers. */
+  phone: string
   password: string
-  phone?: string
   role?: Role
   expectedYearly?: number
 }
@@ -56,9 +55,7 @@ export async function createUser(input: CreateUserInput): Promise<{ uid: string 
   return postJson<{ uid: string }>('/api/admin/create-user', input)
 }
 
-export type UserProfilePatch = Partial<
-  Pick<UserProfile, 'name' | 'phone' | 'expectedYearly' | 'active'>
->
+export type UserProfilePatch = Partial<Pick<UserProfile, 'name' | 'expectedYearly' | 'active'>>
 
 /** Profile edits go through the admin API so every write is authorised server-side. */
 export async function updateUser(uid: string, patch: UserProfilePatch): Promise<void> {

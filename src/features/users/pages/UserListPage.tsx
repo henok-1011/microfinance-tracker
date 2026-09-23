@@ -12,6 +12,7 @@ import { TargetInput } from '@/features/users/components/TargetInput'
 import { describeUserError } from '@/features/users/errors'
 import { useTargets, useUsers } from '@/features/users/hooks'
 import { deleteUser } from '@/features/users/service'
+import { todayIso } from '@/lib/clock'
 
 export function UserListPage() {
   const { t } = useTranslation()
@@ -19,7 +20,7 @@ export function UserListPage() {
   const { data: users, loading, error, reload: reloadUsers } = useUsers()
   const { data: targets, reload: reloadTargets } = useTargets()
 
-  const [year, setYear] = useState(() => new Date().getFullYear())
+  const [year, setYear] = useState(() => Number(todayIso().slice(0, 4)))
   const [creating, setCreating] = useState(false)
   const [editingUid, setEditingUid] = useState<string | null>(null)
   const [confirmingUid, setConfirmingUid] = useState<string | null>(null)
@@ -28,7 +29,7 @@ export function UserListPage() {
   const isAdmin = role === 'admin'
 
   const sortedUsers = useMemo(
-    () => [...users].sort((a, b) => a.name.localeCompare(b.name) || a.email.localeCompare(b.email)),
+    () => [...users].sort((a, b) => a.name.localeCompare(b.name) || a.phone.localeCompare(b.phone)),
     [users],
   )
 
@@ -124,9 +125,9 @@ export function UserListPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-slate-900">
-                        {item.name || item.email}
+                        {item.name || item.phone}
                       </p>
-                      <p className="truncate text-xs text-slate-500">{item.email}</p>
+                      <p className="truncate text-xs text-slate-500">{item.phone}</p>
                       {item.phone ? (
                         <p className="mt-0.5 truncate text-xs text-slate-500">{item.phone}</p>
                       ) : null}

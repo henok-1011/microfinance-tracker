@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
+import { isPhoneValid, normalizePhone, phoneToAuthEmail } from '../../src/lib/phone.ts'
 import { adminAuth, adminDb } from '../_lib/firebaseAdmin'
 import { HttpError, requireAdmin } from '../_lib/requireAdmin'
 
@@ -7,9 +8,8 @@ type Role = 'admin' | 'user'
 
 type CreateUserBody = {
   name?: string
-  email?: string
-  password?: string
   phone?: string
+  password?: string
   role?: Role
   expectedYearly?: number
 }
@@ -25,37 +25,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const {
       name,
-      email,
-      password,
       phone,
+      password,
       role = 'user',
       expectedYearly = 0,
     } = (req.body ?? {}) as CreateUserBody
 
-    if (!name || !email || !password) {
-      res.status(400).json({ error: 'name, email and password are required' })
+    if (!name || !phone || !password) {
+      res.status(400).json({ error: 'name, phone and password are required' })
+      return
+    }
+    if (!isPhoneValid(phone)) {
+      res.status(400).json({ error: 'Enter a valid phone number, for example 0912345678' })
       return
     }
 
-    const userRecord = await adminAuth.createUser({
-      email,
-      password,
-      displayName: name,
-    })
+    // The phone is the credential, so it is stored normalised: one account per
+    // number, however the admin typed it.
+    const normalizedPhone = normalizePhone(phone)
+
+    let userRecord
+    try {
+      userRecord = await adminAuth.createUser({
+        email: phoneToAuthEmail(phone),
+        password,
+        displayName: name,
+      })
+    } catch (error) {
+      if ((error as { code?: string }).code === 'auth/email-already-exists') {
+        res.status(409).json({ error: 'An account with that phone number already exists' })
+        return
+      }
+      throw error
+    }
+
     await adminAuth.setCustomUserClaims(userRecord.uid, { role })
 
-    await adminDb
-      .collection('users')
-      .doc(userRecord.uid)
-      .set({
-        name,
-        email,
-        phone: phone ?? '',
-        role,
-        expectedYearly,
-        active: true,
-        createdAt: new Date().toISOString(),
-      })
+    await adminDb.collection('users').doc(userRecord.uid).set({
+      name,
+      phone: normalizedPhone,
+      role,
+      expectedYearly,
+      active: true,
+      createdAt: new Date().toISOString(),
+    })
 
     res.status(201).json({ uid: userRecord.uid })
   } catch (error) {

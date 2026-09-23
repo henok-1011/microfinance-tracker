@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { YearSelect } from '@/components/ui/YearSelect'
 import { addContribution } from '@/features/contributions/service'
 import { describeUserError } from '@/features/users/errors'
-import { isIsoDate, round2, summarizeUser, todayIso } from '@/lib/calc'
+import { isIsoDate, round2, summarizeUser } from '@/lib/calc'
+import { todayIso } from '@/lib/clock'
 import { formatETB } from '@/lib/format'
 import type { Contribution, Target, UserProfile } from '@/lib/types'
 
@@ -41,7 +42,7 @@ export function ContributionForm({
   const [submitting, setSubmitting] = useState(false)
 
   const sortedUsers = useMemo(
-    () => [...users].sort((a, b) => a.name.localeCompare(b.name) || a.email.localeCompare(b.email)),
+    () => [...users].sort((a, b) => a.name.localeCompare(b.name) || a.phone.localeCompare(b.phone)),
     [users],
   )
 
@@ -119,7 +120,7 @@ export function ContributionForm({
           <option value="">{t('admin.contributions.selectUser')}</option>
           {sortedUsers.map((option) => (
             <option key={option.uid} value={option.uid}>
-              {option.name || option.email}
+              {option.name || option.phone}
               {option.active ? '' : ` — ${t('admin.users.inactive')}`}
             </option>
           ))}

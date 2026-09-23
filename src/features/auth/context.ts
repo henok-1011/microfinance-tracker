@@ -10,7 +10,7 @@ export interface AuthState {
   user: User | null
   profile: UserProfile | null
   role: Role | null
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (phone: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   refreshRole: () => Promise<void>
 }

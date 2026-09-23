@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 
 import { AuthContext, type AuthState } from '@/features/auth/context'
 import { auth, db } from '@/lib/firebase'
+import { phoneToAuthEmail } from '@/lib/phone'
 import type { Role, UserProfile } from '@/lib/types'
 
 function resolveRole(claimRole: unknown, profileRole: Role | undefined): Role {
@@ -56,8 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password)
+  // The typed phone number is mapped to its internal address here, so no caller
+  // has to know how credentials are stored.
+  const signIn = useCallback(async (phone: string, password: string) => {
+    await signInWithEmailAndPassword(auth, phoneToAuthEmail(phone), password)
   }, [])
 
   const signOut = useCallback(async () => {

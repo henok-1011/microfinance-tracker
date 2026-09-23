@@ -4,11 +4,14 @@ import { Outlet } from 'react-router-dom'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { LanguageToggle } from '@/components/LanguageToggle'
 import { useAuth } from '@/features/auth/useAuth'
+import { DateRangeProvider } from '@/features/reports/DateRangeProvider'
 
 export function AppLayout() {
   const { t } = useTranslation()
-  const { profile, user, role, signOut } = useAuth()
-  const displayName = profile?.name ?? user?.email ?? ''
+  const { profile, role, signOut } = useAuth()
+  // The profile, never the Auth user: its `email` is the internal address
+  // derived from the phone number and must not be shown.
+  const displayName = profile?.name ?? profile?.phone ?? ''
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-screen-sm flex-col">
@@ -43,7 +46,10 @@ export function AppLayout() {
 
       {/* pb clears the fixed tab bar plus the home indicator on notched phones. */}
       <main className="flex-1 px-4 pt-4 pb-24">
-        <Outlet />
+        {/* Home and Reports share this period, so it survives tab switches. */}
+        <DateRangeProvider>
+          <Outlet />
+        </DateRangeProvider>
       </main>
 
       <BottomNav />
