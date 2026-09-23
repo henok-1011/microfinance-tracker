@@ -1,13 +1,14 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { DateRangeFilter } from '@/components/ui/DateRangeFilter'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { ListSkeleton } from '@/components/ui/Skeleton'
-import { YearSelect } from '@/components/ui/YearSelect'
+import { RecentContributions } from '@/features/contributions/components/RecentContributions'
 import { UserProgressCards } from '@/features/contributions/components/UserProgressCards'
 import { useContributions } from '@/features/contributions/hooks'
 import { useLoans, useRepayments } from '@/features/loans/hooks'
 import { PoolSummaryCards } from '@/features/reports/components/PoolSummaryCards'
+import { useDateRange } from '@/features/reports/useDateRange'
 import { useTargets, useUsers } from '@/features/users/hooks'
 
 export function DashboardPage() {
@@ -28,18 +29,17 @@ export function DashboardPage() {
     reload: reloadRepayments,
   } = useRepayments()
 
-  const [year, setYear] = useState(() => new Date().getFullYear())
+  const { range, setRange } = useDateRange()
 
   const loading = usersLoading || contributionsLoading || loansLoading || repaymentsLoading
   const error = usersError ?? contributionsError ?? loansError ?? repaymentsError
 
   return (
     <section>
-      <div className="flex items-start justify-between gap-3">
-        <h2 className="text-lg font-semibold text-slate-900">{t('reports.dashboard')}</h2>
-        <div className="shrink-0 pt-0.5">
-          <YearSelect value={year} onChange={setYear} />
-        </div>
+      <h2 className="text-lg font-semibold text-slate-900">{t('reports.dashboard')}</h2>
+
+      <div className="mt-3">
+        <DateRangeFilter range={range} onChange={setRange} />
       </div>
 
       {loading ? (
@@ -70,8 +70,12 @@ export function DashboardPage() {
               contributions={contributions}
               loans={loans}
               repayments={repayments}
-              year={year}
+              range={range}
             />
+          </div>
+
+          <div className="mt-6">
+            <RecentContributions users={users} contributions={contributions} />
           </div>
 
           <div className="mt-6">
@@ -79,7 +83,7 @@ export function DashboardPage() {
               users={users}
               targets={targets}
               contributions={contributions}
-              year={year}
+              range={range}
             />
           </div>
         </>

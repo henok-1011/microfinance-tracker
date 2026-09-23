@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { summarizePool, todayIso } from '@/lib/calc'
+import { summarizePool, type DateRange } from '@/lib/calc'
+import { todayIso } from '@/lib/clock'
 import { formatETB } from '@/lib/format'
 import type { Contribution, Loan, Repayment, Target } from '@/lib/types'
 
@@ -10,7 +11,7 @@ interface PoolSummaryCardsProps {
   contributions: Contribution[]
   loans: Loan[]
   repayments: Repayment[]
-  year: number
+  range: DateRange
 }
 
 export function PoolSummaryCards({
@@ -18,14 +19,14 @@ export function PoolSummaryCards({
   contributions,
   loans,
   repayments,
-  year,
+  range,
 }: PoolSummaryCardsProps) {
   const { t, i18n } = useTranslation()
 
-  // Loans and repayments are all-time; only targets and contributions are year-scoped.
+  // Loans and repayments are all-time; only targets and contributions are scoped.
   const pool = useMemo(
-    () => summarizePool(targets, contributions, loans, repayments, todayIso(), year),
-    [targets, contributions, loans, repayments, year],
+    () => summarizePool(targets, contributions, loans, repayments, todayIso(), range),
+    [targets, contributions, loans, repayments, range],
   )
 
   const stats = [
@@ -39,6 +40,9 @@ export function PoolSummaryCards({
   return (
     <section>
       <h3 className="text-sm font-semibold text-slate-900">{t('reports.pool.title')}</h3>
+      <p className="mt-1 text-xs text-slate-500">
+        {t('reports.period', { from: range.from, to: range.to })}
+      </p>
 
       <dl className="mt-3 grid grid-cols-2 gap-3">
         {stats.map((stat) => (

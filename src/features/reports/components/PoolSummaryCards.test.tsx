@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import i18n from '@/i18n'
 import { PoolSummaryCards } from '@/features/reports/components/PoolSummaryCards'
+import { yearRange } from '@/lib/calc'
 import type { Contribution, Loan, Target } from '@/lib/types'
 
 // Interest-free so every figure is independent of the date the test runs on.
@@ -11,7 +12,7 @@ const LOAN: Loan = {
   borrowerName: 'Borrower',
   borrowerPhone: '',
   principal: 1200,
-  annualRatePct: 0,
+  monthlyRatePct: 0,
   startDate: '2026-01-01',
   dueDate: '2026-12-31',
   status: 'active',
@@ -39,7 +40,7 @@ function renderCards() {
       contributions={[CONTRIBUTION]}
       loans={[LOAN]}
       repayments={[]}
-      year={2026}
+      range={yearRange(2026)}
     />,
   )
   return view
@@ -67,5 +68,10 @@ describe('PoolSummaryCards', () => {
   it('reports the outstanding loan book', () => {
     const { container } = renderCards()
     expect(container).toHaveTextContent(/1,?200/)
+  })
+
+  it('states the period the contribution figures cover', () => {
+    const { container } = renderCards()
+    expect(container).toHaveTextContent('2026-01-01 → 2026-12-31')
   })
 })
